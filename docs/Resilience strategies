@@ -1,0 +1,5 @@
+1)	Rate Limiting (Sliding Window):-
+The purpose of Rate limiting is to prevent abuse of your system such as brute force attacks and DDoS attacks.
+Sliding window Algorithm: The sliding window algorithm is more accurate than fixed window or token bucket algorithms because it tracks requests in real time over
+a rolling time window. This prevents users from making too many requests in a short period, ensuring fair usage of resources.
+Redis: 
