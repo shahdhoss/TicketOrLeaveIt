@@ -1,0 +1,146 @@
+openapi: 3.0.0
+info:
+  title: User API
+  version: 1.0.0
+  description: The application is divided into microservice, for each microservice there is a RESTful API created, this is the User API
+
+paths:
+  /user:
+    post:
+      summary: Add a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User created successfully
+
+  /user/{id}/profile-picture:
+    post:
+      summary: Adds a profile picture for a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the user to add a profile picture for
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfilePicture'
+      responses:
+        '200':
+          description: User profile picture added successfully
+    patch:
+      summary: Modify the profile picture of a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfilePicture'
+      responses:
+        '200':
+          description: User profile picture modified successfully
+
+  /user/{id}:
+    get:
+      summary: Get a user by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the user to retrieve
+      responses:
+        '200':
+          description: Gets an user using user id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      summary: Delete a user by id
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          description: User not found
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Deletes an user using user id
+
+
+    patch:
+      summary: Partially update user's info
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the user to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '204':
+          description: User info updated successfully
+        '404':
+          description: User not found
+
+
+
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: "Shahd"
+        last_name:
+          type: string
+          example: "Hossam"
+        email:
+          type: string
+          example: "shahd@gmail.com"
+        password:
+          type: array
+          items:
+            type: string
+            example: "shahdshahd"
+    UserUpdate:
+      type: object
+      properties:
+        password:
+          type: string
+          example: "shahdhoss"
+    UserProfilePicture:
+      type: object
+      properties:
+        picture:
+          type: string
+          example: "data:image/jpeg;base64"

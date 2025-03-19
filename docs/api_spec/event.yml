@@ -1,0 +1,194 @@
+openapi: 3.0.0
+info:
+  title: Event API
+  version: 1.0.0
+  description: The application is divided into microservice, for each microservice there is a RESTful API created, this is the event API
+
+paths:
+  /event:
+    get:
+      summary: Get all Events
+      responses:
+        '200':
+          description: Gets a list of dictionaries of all events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+    post:
+      summary: Add a new event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '201':
+          description: Event created successfully
+
+  /event/{id}:
+    get:
+      summary: Get an event by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the event to retrieve
+      responses:
+        '200':
+          description: Gets an event using event id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+    delete:
+      summary: Delete an event by id
+      responses:
+        '204':
+          description: Event deleted successfully
+        '404':
+          description: Event not found
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Deletes an event using event id
+
+
+    patch:
+      summary: Partially update an event
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the event to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventUpdate'
+      responses:
+        '204':
+          description: Event updated successfully
+        '404':
+          description: Event not found
+
+  /event/{user_id}:
+    get:
+      summary: Get the event history of a user
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the user
+      responses:
+        '200':
+          description: Gets all events using user id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventHistory'
+
+
+  /event/{id}/capacity:
+    get:
+      summary: Get the remaining capacity of an event
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the event to retrieve
+      responses:
+        '200':
+          description: Gets an event using event id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                $ref: '#/components/schemas/EventCapacity'
+
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "Concert"
+        artist:
+          type: string
+          example: "Helena Hauff"
+        description:
+          type: string
+          example: "Expect pulsating beats, minimal lighting, and a stripped-back industrial setting that will transport you straight to the roots of Berlin’s legendary rave culture."
+        date:
+          type: string
+          format: date-time
+        location:
+          type: string
+          example: "Cairo"
+        capacity:
+          type: integer
+          example: 200
+        price:
+          type: integer
+          example: 500
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+            example: "data:image/jpeg;base64"
+    EventUpdate:
+      type: object
+      properties:
+        price:
+          type: integer
+          example: 250
+    EventCapacity:
+      type: object
+      properties:
+        capacity:
+          type: integer
+          example: 100
+    EventHistory :
+      type: object
+      properties:
+        type:
+          type: string
+          example: "Concert"
+        artist:
+          type: string
+          example: "Helena Hauff"
+        description:
+          type: string
+          example: "Expect pulsating beats, minimal lighting, and a stripped-back industrial setting that will transport you straight to the roots of Berlin’s legendary rave culture."
+        date:
+          type: string
+          format: date-time
+        location:
+          type: string
+          example: "Cairo"
+        capacity:
+          type: integer
+          example: 200
+        price:
+          type: integer
+          example: 500
