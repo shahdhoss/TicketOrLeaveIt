@@ -29,11 +29,11 @@ How it Helps ?
 . Reduces the impact of failures on the overall user experience.
 . Provides time for recovery without completely shutting down the system.
 
-3) Load Balancing (Engine X) or (redis) :-
+3) Load Balancing (NginX):-
 Load balancing is crucial for distributing incoming traffic across multiple servers to ensure no single server is overwhelmed. This is especially important during peak times,
 such as when tickets for a popular event go on sale.
 
-Engine X (Nginx) : Nginx is a high-performance load balancer that can handle thousands of concurrent connections. It supports Layer 7 load balancing, 
+ Nginx : Nginx is a high-performance load balancer that can handle thousands of concurrent connections. It supports Layer 7 load balancing, 
 which allows for advanced routing based on URLs, headers, and cookies.
 
 Redis : Redis is used for session storage and caching, which helps in maintaining session persistence and reducing the load on backend servers.
