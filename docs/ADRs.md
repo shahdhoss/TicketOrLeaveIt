@@ -27,7 +27,41 @@ We will adopt a microservices architecture, with dedicated services for authenti
 
 ---
 
-## ADR 002: Rate Limiting (Sliding Window)
+
+# ADR 002: Choosing GoLang as the Main Coding Language
+
+**Status:** Accepted
+
+**Context:**
+Our system is built on a microservices architecture, requiring a programming language that is efficient, scalable, and well-suited for distributed systems. We need to choose a language that aligns with our goals of high performance, ease of development, and maintainability.
+
+**Decision:**
+We will use **Go (Golang)** as the primary programming language for developing our microservices.
+
+**Rationale:**
+- **Performance:** Go is a statically typed, compiled language known for its high performance and low latency, making it ideal for handling high-concurrency scenarios common in microservices.
+- **Simplicity:** Go's syntax is simple and easy to learn, reducing the learning curve for developers and speeding up development.
+- **Concurrency Support:** Go has built-in support for concurrency through goroutines and channels, which are essential for handling multiple requests simultaneously in a microservices architecture.
+- **Scalability:** Go's lightweight goroutines and efficient memory management make it highly scalable, allowing us to handle large volumes of traffic with minimal resource usage.
+- **Strong Standard Library:** Go comes with a robust standard library that includes packages for HTTP servers, JSON parsing, and more, reducing the need for third-party dependencies.
+- **Community and Ecosystem:** Go has a growing community and a rich ecosystem of libraries and tools, making it easier to find solutions and best practices for microservices development.
+
+**Consequences:**
+- **Positive Impacts:**
+  - High performance and low latency, ensuring that our microservices can handle high traffic and concurrent requests efficiently.
+  - Simplified development process due to Go's clean syntax and strong standard library.
+  - Built-in concurrency support enables efficient handling of multiple requests, improving system responsiveness.
+  - Scalability and efficient resource usage make Go a cost-effective choice for deploying microservices.
+  - Cross-platform support simplifies deployment across different environments.
+- **Potential Drawbacks:**
+  - Go's simplicity may limit flexibility in certain advanced use cases compared to more feature-rich languages like Python or Java.
+  - The Go ecosystem, while growing, may not have as many third-party libraries or frameworks as more established languages.
+  - Go is a relatively new programming language, which makes developers may require more time to learn the language and its concurrency model.
+
+---
+
+
+## ADR 003: Rate Limiting (Sliding Window)
 
 **Status:** Proposed
 
@@ -51,7 +85,7 @@ We will use the Sliding Window algorithm for rate limiting, leveraging Redis for
   - Redis, while fast, may introduce additional complexity in managing in-memory data storage and ensuring its availability.
 
 ---
-# ADR 003: Fault Tolerance (Graceful Degradation)
+# ADR 004: Fault Tolerance (Graceful Degradation)
 
 **Status:** Proposed
 
@@ -77,7 +111,7 @@ We will implement **graceful degradation** to maintain partial functionality dur
 
 ---
 
-## ADR 004: Load Balancing (Nginx)
+## ADR 005: Load Balancing (Nginx)
 
 **Status:** Proposed
 
@@ -102,7 +136,7 @@ We will use Nginx for load balancing and Redis for session storage and caching.
 
 ---
 
-## ADR 005: Messaging & REST API
+## ADR 006: Messaging & REST API
 
 **Status:** Proposed
 
@@ -129,7 +163,7 @@ We will use RabbitMQ for asynchronous communication and REST APIs for standardiz
 ---
 
 
-## ADR 006: Database Selection (PostgreSQL)
+## ADR 007: Database Selection (PostgreSQL)
 
 **Status:** Proposed
 
