@@ -1,0 +1,115 @@
+asyncapi: '2.6.0'
+info:
+  title: Ticket Booking - Notifications Service
+  version: '1.1.0'
+  description: |
+    This service listens for booking-related events and sends notifications to users for booking confirmations, cancellations, and event reminders.
+
+servers:
+  development:
+    url: localhost:5672
+    protocol: amqp
+    description: RabbitMQ broker for development environment
+
+channels:
+  booking.confirmed:
+    description: Event published when a booking is successfully confirmed.
+    subscribe:
+      summary: Listen for booking confirmation events.
+      operationId: onBookingConfirmed
+      message:
+        $ref: '#/components/messages/BookingConfirmed'
+
+  booking.cancelled:
+    description: Event published when a booking is cancelled.
+    subscribe:
+      summary: Listen for booking cancellation events.
+      operationId: onBookingCancelled
+      message:
+        $ref: '#/components/messages/BookingCancelled'
+
+  event.reminder:
+    description: Event published to remind users about upcoming events.
+    subscribe:
+      summary: Listen for event reminder notifications.
+      operationId: onEventReminder
+      message:
+        $ref: '#/components/messages/EventReminder'
+
+components:
+  messages:
+    BookingConfirmed:
+      name: BookingConfirmed
+      title: Booking Confirmed Event
+      summary: Sent when a booking is confirmed.
+      payload:
+        type: object
+        properties:
+          bookingId:
+            type: string
+          userId:
+            type: string
+          eventName:
+            type: string
+          date:
+            type: string
+            format: date-time
+          email:
+            type: string
+        required:
+          - bookingId
+          - userId
+          - eventName
+          - date
+          - email
+
+    BookingCancelled:
+      name: BookingCancelled
+      title: Booking Cancelled Event
+      summary: Sent when a booking is cancelled.
+      payload:
+        type: object
+        properties:
+          bookingId:
+            type: string
+          userId:
+            type: string
+          cancelledAt:
+            type: string
+            format: date-time
+          email:
+            type: string
+        required:
+          - bookingId
+          - userId
+          - cancelledAt
+          - email
+
+    EventReminder:
+      name: EventReminder
+      title: Event Reminder Event
+      summary: Sent to remind the user of an upcoming event.
+      payload:
+        type: object
+        properties:
+          bookingId:
+            type: string
+          userId:
+            type: string
+          eventName:
+            type: string
+          eventDate:
+            type: string
+            format: date-time
+          reminderSentAt:
+            type: string
+            format: date-time
+          email:
+            type: string
+        required:
+          - bookingId
+          - userId
+          - eventName
+          - eventDate
+          - reminderSentAt
+          - email
