@@ -162,9 +162,9 @@ We will use RabbitMQ for asynchronous communication and REST APIs for standardiz
 
 ---
 
-# ADR 007: Database Selection (PostgreSQL)
+## ADR 007: Database Selection (PostgreSQL)
 
-**Status:** Accepted
+**Status:** proposed
 
 **Context:**
 Our microservices architecture requires a database solution that ensures data consistency, availability, and proper isolation between services.
@@ -180,13 +180,6 @@ We will implement dedicated PostgreSQL databases for each microservice, with no 
 - **Operational Simplicity:** Eliminates replication management overhead
 - **Cost-Effectiveness:** Single instance per service reduces costs
 - **Consistency:** ACID compliance within each service boundary
-
-**Database Allocation:**
-- Auth Service: User credentials, sessions
-- User Service: Profiles, preferences  
-- Event Service: Listings, details, capacity
-- Ticket Service: Inventory, sales, pricing
-- Notification Service: Templates, queues
 
 **Consequences:**
 
