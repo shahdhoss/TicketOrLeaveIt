@@ -22,6 +22,8 @@ It also supports distributed systems, making it scalable for high-traffic scenar
 - The system displays a default list of popular events (pre-cached or stored in a static list) instead of personalized recommendations.
 - A message is shown to the user: "Personalized recommendations are temporarily unavailable. Here are some popular events you might like!"
 
+-  Circuit Breaker :  acts like a safety switch topping calls to failing services and automating recovery when they come back online.
+
 **How it Helps ?**
 - Maintains partial functionality during failures, ensuring that users can still interact with the system.
 - Reduces the impact of failures on the overall user experience.
