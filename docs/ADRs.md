@@ -162,40 +162,49 @@ We will use RabbitMQ for asynchronous communication and REST APIs for standardiz
 
 ---
 
-## ADR 007: Database Selection (PostgreSQL)
+# ADR 007: Database Selection (PostgreSQL)
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Context:**
-To ensure data consistency and availability, we need a robust and reliable database.
+Our microservices architecture requires a database solution that ensures data consistency, availability, and proper isolation between services.
 
 **Decision:**
-We will use PostgreSQL for its reliability, scalability, and support for complex queries.
+We will implement dedicated PostgreSQL databases for each microservice, with no replication between instances.
 
 **Rationale:**
-- **Reliability:** PostgreSQL is known for its reliability and support for complex queries.
-- **Performance:** Handles complex queries efficiently for our event and ticket management needs.
-- **Operational Simplicity:** Avoids the complexity of managing a replicated database cluster.
-- **Cost-Effectiveness:** Single instance deployment reduces infrastructure costs.
-- **Data Consistency:** Ensures data consistency and integrity, even during high traffic.
+- **Reliability:** PostgreSQL provides proven reliability and supports complex queries
+- **Performance:** Optimized for our event/ticket management workloads
+- **Fault Isolation:** Prevents Single Point of Failure (SPOF) by decoupling service databases
+- **Service Boundaries:** Enforces clear data ownership per domain
+- **Operational Simplicity:** Eliminates replication management overhead
+- **Cost-Effectiveness:** Single instance per service reduces costs
+- **Consistency:** ACID compliance within each service boundary
+
+**Database Allocation:**
+- Auth Service: User credentials, sessions
+- User Service: Profiles, preferences  
+- Event Service: Listings, details, capacity
+- Ticket Service: Inventory, sales, pricing
+- Notification Service: Templates, queues
 
 **Consequences:**
-- **Positive Impacts:**
-  - Ensures data consistency and integrity, even during high traffic.
-  - Provides fault tolerance through database replication and failover.
-  - Supports complex queries and transactions, essential for managing event and ticket data.
-  - Application can implement business-specific fallback logic
-  - Lower infrastructure costs compared to high-availability clusters
-  - Easier debugging with single source of truth
-    
-- **Potential Drawbacks:**
-  - Requires careful implementation of retry logic in application code
-  - Planned maintenance will require downtime windows if no replication was implemented
-  - Temporary loss of write capability during outages
-  - Developers must be mindful of implementing proper fallback behaviors
-  - May need to implement additional caching layer for read resilience
-  - PostgreSQL, while powerful, may require careful tuning and optimization to handle high traffic and complex queries efficiently.
 
+**Positive Impacts:**
+- Eliminates database-level SPOF across services
+- Ensures strong data consistency during peak loads
+- Provides clear fault containment boundaries
+- Supports complex transactions within each domain
+- Enables service-specific optimization
+- Simplifies debugging with isolated data stores
+
+**Potential Drawbacks:**
+- Requires careful retry logic implementation
+- Service-specific maintenance downtime
+- Temporary write unavailability during outages
+- May need Redis caching for read resilience
+- Requires performance tuning for scale
+  
 ---
 # ADR 008: Circuit Breaker Pattern Implementation
 
