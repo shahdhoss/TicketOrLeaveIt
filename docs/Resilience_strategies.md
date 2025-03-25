@@ -81,7 +81,13 @@ to ensure that notifications are sent even if other services are down.
 # 6) Database :-
 
 
-- **SQL (PostgreSQL) :**  We chose PostgreSQL for its reliability, scalability, and support for complex queries. It also supports replication and failover, which are critical for high availability.
+- **SQL (PostgreSQL) :**  We chose PostgreSQL for its reliability, scalability, and support for complex queries, It also has dedicated databases per microservice prevent cascading failures (no shared database SPOF),And
+Clear service boundaries ensure failures in one database do not affect others.
 
+**How it Helps?**
+● Eliminates database-level SPOF across services 
+● Ensures strong data consistency during peak loads 
+● Provides clear fault containment boundaries 
+● Supports complex transactions within each domain 
 
 
