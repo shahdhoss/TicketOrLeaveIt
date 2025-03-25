@@ -10,7 +10,7 @@
     9. Organizers should be able to view a dashboard displaying event performance metrics.
     10. The system should support centralized logging using OpenSearch.
 # Non-functional Requirements 
-    1. The system should be able to support up to 400 RPS at peak load.
+    1. The system should be able to serve 2,000 users daily, up to 400 concurrent RPS at peak load.
     2. The system's data should be consistent and reliable, ensuring that all transactions are correctly processed, preventing data loss.
     3. The system should offer high throughput with low latency for its users
     4. The system should maintain an uptime of 99% or higher
