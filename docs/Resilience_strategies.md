@@ -79,15 +79,9 @@ to ensure that notifications are sent even if other services are down.
 ---
 
 # 6) Database :-
-#### The database is the backbone of our system, storing critical data such as user information, event details, and ticket availability, A robust and reliable database is essential for ensuring data consistency and availability.
+
 
 - **SQL (PostgreSQL) :**  We chose PostgreSQL for its reliability, scalability, and support for complex queries. It also supports replication and failover, which are critical for high availability.
 
-- **Replication :**  We use active-passive replication to ensure that if the primary database fails, a replica can take over with minimal downtime.
-
-**How it Helps?**
-- Ensures data consistency and integrity, even during high traffic.
-- Provides fault tolerance through database replication and failover.
-- Supports complex queries and transactions, which are essential for managing event and ticket data.
 
 
