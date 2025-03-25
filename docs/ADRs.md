@@ -162,7 +162,6 @@ We will use RabbitMQ for asynchronous communication and REST APIs for standardiz
 
 ---
 
-
 ## ADR 007: Database Selection (PostgreSQL)
 
 **Status:** Proposed
@@ -175,7 +174,9 @@ We will use PostgreSQL for its reliability, scalability, and support for complex
 
 **Rationale:**
 - **Reliability:** PostgreSQL is known for its reliability and support for complex queries.
-- **Scalability:** Supports replication and failover, which are critical for high availability.
+- **Performance:** Handles complex queries efficiently for our event and ticket management needs.
+- **Operational Simplicity:** Avoids the complexity of managing a replicated database cluster.
+- **Cost-Effectiveness:** Single instance deployment reduces infrastructure costs.
 - **Data Consistency:** Ensures data consistency and integrity, even during high traffic.
 
 **Consequences:**
@@ -183,8 +184,74 @@ We will use PostgreSQL for its reliability, scalability, and support for complex
   - Ensures data consistency and integrity, even during high traffic.
   - Provides fault tolerance through database replication and failover.
   - Supports complex queries and transactions, essential for managing event and ticket data.
+  - Application can implement business-specific fallback logic
+  - Lower infrastructure costs compared to high-availability clusters
+  - Easier debugging with single source of truth
+    
 - **Potential Drawbacks:**
-  - Setting up and managing PostgreSQL with replication and failover may require additional expertise and effort.
+  - Requires careful implementation of retry logic in application code
+  - Planned maintenance will require downtime windows if no replication was implemented
+  - Temporary loss of write capability during outages
+  - Developers must be mindful of implementing proper fallback behaviors
+  - May need to implement additional caching layer for read resilience
   - PostgreSQL, while powerful, may require careful tuning and optimization to handle high traffic and complex queries efficiently.
 
+---
+# ADR 008: Circuit Breaker Pattern Implementation
+
+**Status:** Proposed
+
+**Context:**
+Our microservices architecture needs to handle failures gracefully and prevent cascading failures when dependent services become unavailable or exhibit high latency.
+
+**Decision:**
+We will implement the Circuit Breaker pattern for inter-service communication to improve system resilience.
+
+**Rationale:**
+- Prevents cascading failures across microservices
+- Reduces load on failing services
+- Provides predictable failure modes
+- Faster failure detection than timeouts alone
+
+**Consequences:**
+- **Positive Impacts:**
+  - Improved system stability during partial outages
+  - Better user experience with clear error messages
+  - Reduced resource waste on doomed requests
+  - Automatic recovery detection
+  - Gives failing services time to recover
+- **Potential Drawbacks:**
+  - Additional complexity
+  - Requires careful tuning of thresholds
+  - May mask underlying problems if misconfigured
+  - Need for comprehensive monitoring
+
+---
+
+# ADR 009: Retry Logic Implementation
+
+**Status:** Proposed
+
+**Context:**
+Transient failures in distributed systems require resilient retry mechanisms to maintain service reliability without overwhelming failing components.
+
+**Decision:**
+We will implement exponential backoff retry logic with jitter for all external service calls and database operations.
+
+**Rationale:**
+- Handles transient failures automatically
+- Exponential backoff prevents thundering herds
+- Clear retry eligibility prevents harmful retries
+- Balanced approach between persistence and responsiveness
+
+**Consequences:**
+- **Positive Impacts:**
+  - Increased success rates for transient failures
+  - Better resource utilization during outages
+  - Automatic recovery without user intervention
+  - Configurable for different service needs
+- **Potential Drawbacks:**
+  - Increased latency for end-users during retries
+  - Potential for duplicate operations if not properly implemented
+  - More complex error handling paths
 ---
