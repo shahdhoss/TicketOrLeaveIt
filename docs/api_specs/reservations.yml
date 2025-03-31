@@ -1,0 +1,139 @@
+openapi: 3.0.0
+info:
+  title: Reserve API
+  version: 1.0.0
+  description: The application is divided into microservice, for each microservice there is a RESTful API created, this is the reservation API
+
+paths:
+  /reserve/{id}:
+    post:
+      summary: Reserve an event by event id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the event to reserve
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  description: The number of tickets to be booked
+                seat_type:
+                  type: string
+                  enum: ["VIP", "Front Row", "Balcony", "General Admission"]
+                  description: Type of seat for the reservation
+                seat_number:
+                  type: string
+                  description: Seat number of the reservations
+
+              required:
+                - seat_type
+                - seat_number
+                - quantity
+      responses:
+        '201':
+          description: Reservation done successfully
+        '500':
+          description: Reservation failed
+        '404':
+          description: Event not found
+
+    patch:
+      summary: Update an user's event reservation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the reservation to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  description: Updated number of tickets
+                seat_type:
+                  type: string
+                  enum: ["VIP", "Front Row", "Balcony", "General Admission"]
+                  description: Updated seat type
+                seat_number:
+                  type: string
+                  description: Updated seat number
+              required:
+                - quantity
+      responses:
+        '200':
+          description: Reservation updated successfully
+        '404':
+          description: Reservation not found
+        '500':
+          description: Internal server error
+
+
+
+    delete:
+      summary: Delete an event reservation of a user by event id
+      responses:
+        '204':
+          description: Event deleted successfully
+        '404':
+          description: Event not found
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Deletes an event reservation using event id
+
+  /history:
+    get:
+      summary: Get the event history of a user
+      responses:
+        '200':
+          description: Gets all events using user id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventHistory'
+
+components:
+  schemas:
+    EventHistory :
+      type: object
+      properties:
+        type:
+          type: string
+          example: "Concert"
+        artist:
+          type: string
+          example: "Helena Hauff"
+        description:
+          type: string
+          example: "Expect pulsating beats, minimal lighting, and a stripped-back industrial setting that will transport you straight to the roots of Berlin’s legendary rave culture."
+        date:
+          type: string
+          format: date-time
+        location:
+          type: string
+          example: "Cairo"
+        capacity:
+          type: integer
+          example: 200
+        price:
+          type: integer
+          example: 500
