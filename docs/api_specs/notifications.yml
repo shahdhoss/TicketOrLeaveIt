@@ -7,9 +7,9 @@ info:
 
 servers:
   development:
-    url: localhost:5672
-    protocol: amqp
-    description: RabbitMQ broker for development environment
+    url: localhost:9092
+    protocol: kafka
+    description: Kafka broker for development environment
 
 channels:
   booking.confirmed:
@@ -35,7 +35,21 @@ channels:
       operationId: onEventReminder
       message:
         $ref: '#/components/messages/EventReminder'
+  payment.deposited:
+    description: Event published when a payment is successfully deposited.
+    subscribe:
+      summary: Listen for payment deposited events.
+      operationId: onPaymentDeposited
+      message:
+        $ref: '#/components/messages/PaymentDeposited'
 
+  payment.refunded:
+      description: Event published when a payment is refunded.
+      subscribe:
+        summary: Listen for payment refunded events.
+        operationId: onPaymentRefunded
+        message:
+          $ref: '#/components/messages/PaymentRefunded'
 components:
   messages:
     BookingConfirmed:
@@ -113,3 +127,58 @@ components:
           - eventDate
           - reminderSentAt
           - email
+    PaymentDeposited:
+        name: PaymentDeposited
+        title: Payment Deposited Event
+        summary: Sent when a payment is successfully deposited.
+        payload:
+          type: object
+          properties:
+            paymentId:
+              type: string
+            userId:
+              type: string
+            reservationId:
+              type: string
+            amount:
+              type: number
+            depositedAt:
+              type: string
+              format: date-time
+            email:
+              type: string
+          required:
+            - paymentId
+            - userId
+            - reservationId
+            - amount
+            - depositedAt
+            - email
+
+    PaymentRefunded:
+          name: PaymentRefunded
+          title: Payment Refunded Event
+          summary: Sent when a payment is refunded.
+          payload:
+            type: object
+            properties:
+              paymentId:
+                type: string
+              userId:
+                type: string
+              reservationId:
+                type: string
+              refundAmount:
+                type: number
+              refundedAt:
+                type: string
+                format: date-time
+              email:
+                type: string
+            required:
+              - paymentId
+              - userId
+              - reservationId
+              - refundAmount
+              - refundedAt
+              - email
