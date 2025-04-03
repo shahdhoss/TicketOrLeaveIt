@@ -151,7 +151,6 @@ paths:
                     items:
                       $ref: "#/components/schemas/Event"
 
-
 components:
   schemas:
     Event:

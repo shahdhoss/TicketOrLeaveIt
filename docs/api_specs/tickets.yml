@@ -84,7 +84,7 @@ paths:
 
 
     delete:
-      summary: Delete an event reservation of a user by event id
+      summary: Delete an event reservation of a user by reservation id
       responses:
         '204':
           description: Event deleted successfully
@@ -96,7 +96,7 @@ paths:
           required: true
           schema:
             type: integer
-          description: Deletes an event reservation using event id
+          description: Deletes an event reservation using reservation id
 
   /history:
     get:
@@ -112,7 +112,7 @@ paths:
                   $ref: '#/components/schemas/EventHistory'
   /hold/{id}:
     post:
-      summary: Hold a ticket or a number of tickets using event id
+      summary: Hold a ticket or a number of tickets using reservation id
       parameters:
         - name: id
           in: path
@@ -201,9 +201,7 @@ paths:
           required: true
           schema:
             type: integer
-          description: Deletes an event reservation using event id
-
-
+          description: Deletes an event reservation using reservation id
           example: 500
 
 
