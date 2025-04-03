@@ -1,0 +1,183 @@
+openapi: 3.0.0
+info:
+  title: Vendor service  API
+  version: 1.0.0
+  description: The application is divided into microservice, for each microservice there is a RESTful API created, this is the vendor service API
+
+paths:
+  /vendor:
+    post:
+      summary: Create a new vendor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of the performer
+                genre:
+                  type: string
+                  description: Genre of the performer
+                biography:
+                  type: string
+                  description: Info about the performer
+                profile_picture:
+                  type: string
+                  description: profile picture for the performer
+                cover_picture:
+                  type: string
+                  description: cover picture for the performer
+
+              required:
+                - name
+                - genre
+                - biography
+                - profile_picture
+                - cover_picture
+      responses:
+        '201':
+          description: Vendor registered successfully
+        '500':
+          description: Vendor registration failed
+
+  /vendor/{id}:
+    patch:
+      summary: Update vendor's info
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the vendor to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of the performer
+                genre:
+                  type: string
+                  description: Genre of the performer
+                biography:
+                  type: string
+                  description: Info about the performer
+                profile_picture:
+                  type: string
+                  description: profile picture for the performer
+                cover_picture:
+                  type: string
+                  description: cover picture for the performer
+      responses:
+        '200':
+          description: Reservation updated successfully
+        '404':
+          description: Reservation not found
+        '500':
+          description: Internal server error
+
+
+
+    delete:
+      summary: Delete a vendor by vendor id
+      responses:
+        '204':
+          description: Vendor deleted successfully
+        '404':
+          description: Vendor not found
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Deletes a vendor from the system using vendor id
+
+  /vendor/events/:
+    post:
+      summary: Registering the upcoming events for a vendor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vendor_id:
+                  type: integer
+                  description: Id of the vendor
+                event_id:
+                  type: integer
+                  description: Id of the event
+
+      responses:
+        '200':
+          description: Event registered successfully for a vendor
+        '404':
+          description: Reservation not found
+        '500':
+          description: Internal server error
+
+  /vendor/events/{id}:
+    get:
+      summary: Gets all events of a vendor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the vendor to update
+      responses:
+        200:
+          description: Successfully retrieved events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vendor_id:
+                    type: integer
+                    example: 123
+                  events:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Event"
+
+
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1000
+        type:
+          type: string
+          example: "Concert"
+        artist:
+          type: string
+          example: "Helena Hauff"
+        description:
+          type: string
+          example: "Expect pulsating beats, minimal lighting, and a stripped-back industrial setting that will transport you straight to the roots of Berlin’s legendary rave culture."
+        date:
+          type: string
+          format: date-time
+        location:
+          type: string
+          example: "Cairo"
+        capacity:
+          type: integer
+          example: 200
+        price:
+          type: integer
+          example: 500
