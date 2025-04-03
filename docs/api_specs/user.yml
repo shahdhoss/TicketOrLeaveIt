@@ -68,7 +68,8 @@ paths:
           description: ID of the user to retrieve
       responses:
         '200':
-          description: Gets an user using user id
+          description: Gets a
+            user using user id
           content:
             application/json:
               schema:
@@ -109,9 +110,6 @@ paths:
           description: User info updated successfully
         '404':
           description: User not found
-
-
-
 
 components:
   schemas:

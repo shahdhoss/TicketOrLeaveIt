@@ -3,34 +3,7 @@ info:
   title: Auth API
   version: 1.0.0
 paths:
-  /auth/signup:
-    post:
-      summary: User Signup
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                  example: "shahd@gmail.com"
-                password:
-                  type: string
-                  format: password
-                  example: "detectiveConan"
-                username:
-                  type: string
-                  example: "shahdhoss"
-      responses:
-        '201':
-          description: User created successfully
-        '400':
-          description: Invalid input data
-
-  /auth/login:
+  /auth/user/login:
     post:
       summary: User Login
       requestBody:
@@ -61,3 +34,63 @@ paths:
                     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
         '401':
           description: Invalid credentials
+
+  /auth/organizer/login:
+    post:
+      summary: Organizer Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "shahd@gmail.com"
+                password:
+                  type: string
+                  format: password
+                  example: "newpassword"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+        '401':
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      summary: User Logout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logout successful"
+        '401':
+          description: Invalid token

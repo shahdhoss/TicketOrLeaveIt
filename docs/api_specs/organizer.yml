@@ -5,6 +5,136 @@ info:
   description: The application is divided into microservice, for each microservice there is a RESTful API created, this is the organizer API
 
 paths:
+  /organizer:
+    post:
+      summary: Adds a new organizer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organization_name:
+                  type: string
+                  example: "Cairo's organization for concerts"
+                industry_type:
+                  type: string
+                  example: "Concerts"
+                primary_contact_name:
+                  type: string
+                  example: "Shahd Hosam"
+                email:
+                  type: string
+                  format: email
+                  example: "shahd@gmail.com"
+                password:
+                  type: string
+                  format: password
+                  example: "detectiveConan"
+                username:
+                  type: string
+                  example: "shahdhoss"
+      responses:
+        '201':
+          description: Organizer created successfully
+    patch:
+      summary: Modifies the info of an existing organizer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organization_name:
+                  type: string
+                  example: "Cairo's organization for concerts"
+                industry_type:
+                  type: string
+                  example: "Concerts"
+                primary_contact_name:
+                  type: string
+                  example: "Shahd Hosam"
+                email:
+                  type: string
+                  format: email
+                  example: "shahd@gmail.com"
+                password:
+                  type: string
+                  format: password
+                  example: "detectiveConan"
+                username:
+                  type: string
+                  example: "shahdhoss"
+      responses:
+        '201':
+          description: Organizer modified successfully
+  /payment_info:
+    post:
+      summary: Add payment details for an organizer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organizer_id:
+                  type: string
+                  example: "org_12345"
+                bank_account_number:
+                  type: string
+                  example: "123456789012"
+                bank_name:
+                  type: string
+                  example: "Cairo National Bank"
+                swift_code:
+                  type: string
+                  example: "CNAIEGCA"
+                iban:
+                  type: string
+                  example: "EG38001900050000012345678902"
+                payment_methods:
+                  type: array
+                  items:
+                    type: string
+                  example: ["Credit Card", "PayPal", "Apple Pay"]
+                currency:
+                  type: string
+                  example: "EGP"
+      responses:
+        '201':
+          description: Payment info added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Payment details added successfully."
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid bank account number format."
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An unexpected error occurred."
+
   /event:
     get:
       summary: Get all Events
@@ -109,15 +239,15 @@ components:
     Event:
       type: object
       properties:
-        event type:
+        event_type:
           type: string
           example: "Concert"
-        event location:
+        event_location:
           type: string
-          example: 'Arena'
-        event address:
+          example: "Arena"
+        event_address:
           type: string
-          example: 'ElSawy culture wheel'
+          example: "ElSawy Culture Wheel"
         artist:
           type: string
           example: "Helena Hauff"
@@ -129,22 +259,32 @@ components:
           items:
             type: string
             format: date-time
-
-        city location:
+            example: "2025-07-10T19:30:00Z"
+        city_location:
           type: string
           example: "Cairo"
         capacity:
           type: integer
           example: 200
-        price:
-          type: integer
-          example: 500
+        ticket_types:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: "VIP"
+              price:
+                type: number
+                format: float
+                example: 500.00
         images:
           type: array
           items:
             type: string
             format: uri
-            example: "data:image/jpeg;base64"
+            example: "https://example.com/event-image.jpg"
+
     EventUpdate:
       type: object
       properties:
