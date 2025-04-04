@@ -69,7 +69,7 @@ paths:
 
   /auth/logout:
     post:
-      summary: User Logout
+      summary: Logout
       requestBody:
         required: true
         content:
