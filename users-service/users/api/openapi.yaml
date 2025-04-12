@@ -1,0 +1,134 @@
+openapi: 3.0.0
+info:
+  description: "The application is divided into microservice, for each microservice\
+    \ there is a RESTful API created, this is the User API"
+  title: User API
+  version: 1.0.0
+servers:
+- url: http://localhost:8080/v1
+paths:
+  /users:
+    post:
+      operationId: usersPOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+        required: true
+      responses:
+        "201":
+          description: User created successfully
+      summary: Add a new user
+      x-eov-operation-handler: controllers/DefaultController
+  /users/profile-picture:
+    patch:
+      operationId: usersProfilePicturePATCH
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userProfilePicture'
+        required: true
+      responses:
+        "200":
+          description: User profile picture modified successfully
+      summary: Modify the profile picture of a user
+      x-eov-operation-handler: controllers/DefaultController
+    post:
+      operationId: usersProfilePicturePOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userProfilePicture'
+        required: true
+      responses:
+        "200":
+          description: User profile picture added successfully
+      summary: Adds a profile picture for a user
+      x-eov-operation-handler: controllers/DefaultController
+  /users/{id}:
+    delete:
+      operationId: usersIdDELETE
+      parameters:
+      - description: Deletes an user using user id
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "204":
+          description: User deleted successfully
+        "404":
+          description: User not found
+      summary: Delete a user by id
+      x-eov-operation-handler: controllers/DefaultController
+    get:
+      operationId: usersIdGET
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Successful response
+      summary: Get a user by id
+      x-eov-operation-handler: controllers/DefaultController
+    patch:
+      operationId: usersIdPATCH
+      parameters:
+      - description: ID of the user to update
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+        required: true
+      responses:
+        "204":
+          description: User info updated successfully
+        "404":
+          description: User not found
+      summary: Partially update user's info
+      x-eov-operation-handler: controllers/DefaultController
+components:
+  schemas:
+    user:
+      properties:
+        first_name:
+          example: Shahd
+          type: string
+        last_name:
+          example: Hossam
+          type: string
+        email:
+          example: shahd@gmail.com
+          type: string
+        password:
+          example: shahdshahd
+          type: string
+      type: object
+    userProfilePicture:
+      properties:
+        id:
+          example: 1
+          type: integer
+        picture:
+          example: data:image/jpeg;base64
+          type: string
+      type: object

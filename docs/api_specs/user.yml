@@ -4,8 +4,11 @@ info:
   version: 1.0.0
   description: The application is divided into microservice, for each microservice there is a RESTful API created, this is the User API
 
+servers: 
+  - url: http://localhost:8080/v1
+
 paths:
-  /user:
+  /users:
     post:
       summary: Add a new user
       requestBody:
@@ -13,67 +16,49 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/user'
       responses:
         '201':
           description: User created successfully
 
-  /user/{id}/profile-picture:
-    post:
-      summary: Adds a profile picture for a user
-      parameters:
-        - name: id
-          in: path
+  /users/profile-picture:
+      post:
+        summary: Adds a profile picture for a user
+        requestBody:
           required: true
-          schema:
-            type: integer
-          description: ID of the user to add a profile picture for
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserProfilePicture'
-      responses:
-        '200':
-          description: User profile picture added successfully
-    patch:
-      summary: Modify the profile picture of a user
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-          description: ID of the user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserProfilePicture'
-      responses:
-        '200':
-          description: User profile picture modified successfully
-
-  /user/{id}:
-    get:
-      summary: Get a user by id
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-          description: ID of the user to retrieve
-      responses:
-        '200':
-          description: Gets a
-            user using user id
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/userProfilePicture'
+        responses:
+          '200':
+            description: User profile picture added successfully
+  
+      patch:
+        summary: Modify the profile picture of a user
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userProfilePicture'
+        responses:
+          '200':
+            description: User profile picture modified successfully
+
+  /users/{id}:
+    get:
+      summary: Get a user by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+            
     delete:
       summary: Delete a user by id
       responses:
@@ -104,7 +89,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserUpdate'
+              $ref: '#/components/schemas/user'
       responses:
         '204':
           description: User info updated successfully
@@ -113,7 +98,8 @@ paths:
 
 components:
   schemas:
-    User:
+  
+    user:
       type: object
       properties:
         first_name:
@@ -126,19 +112,15 @@ components:
           type: string
           example: "shahd@gmail.com"
         password:
-          type: array
-          items:
-            type: string
-            example: "shahdshahd"
-    UserUpdate:
-      type: object
-      properties:
-        password:
           type: string
-          example: "shahdhoss"
-    UserProfilePicture:
+          example: "shahdshahd"
+          
+    userProfilePicture:
       type: object
       properties:
+        id:
+          type: integer
+          example: 1
         picture:
           type: string
           example: "data:image/jpeg;base64"
