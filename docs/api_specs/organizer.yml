@@ -4,6 +4,9 @@ info:
   version: 1.0.0
   description: The application is divided into microservice, for each microservice there is a RESTful API created, this is the organizer API
 
+servers: 
+  - url: http://localhost:8080/v1
+
 paths:
   /organizer:
     post:
@@ -38,8 +41,17 @@ paths:
       responses:
         '201':
           description: Organizer created successfully
+  
+  /organizer/{id}:  
     patch:
       summary: Modifies the info of an existing organizer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the organizer to modify
       requestBody:
         required: true
         content:
@@ -70,7 +82,7 @@ paths:
       responses:
         '201':
           description: Organizer modified successfully
-  /payment_info:
+  /organizer/payment_info:
     post:
       summary: Add payment details for an organizer
       requestBody:
@@ -83,23 +95,18 @@ paths:
                 organizer_id:
                   type: string
                   example: "org_12345"
-                bank_account_number:
+                credit_card_number:
+                  type: integer
+                  example: 
+                expiration_date:
                   type: string
-                  example: "123456789012"
-                bank_name:
-                  type: string
-                  example: "Cairo National Bank"
-                swift_code:
-                  type: string
-                  example: "CNAIEGCA"
-                iban:
-                  type: string
-                  example: "EG38001900050000012345678902"
+                  format: date
+                  example:
                 payment_methods:
                   type: array
                   items:
                     type: string
-                  example: ["Credit Card", "PayPal", "Apple Pay"]
+                  example: ["Credit Card", "Cash"]
                 currency:
                   type: string
                   example: "EGP"
@@ -323,3 +330,4 @@ components:
         price:
           type: integer
           example: 500
+ 
