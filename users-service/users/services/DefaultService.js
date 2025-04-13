@@ -17,7 +17,6 @@ const usersIdDELETE = ( id ) => new Promise(
       if (!deletedUser){
         reject(Service.rejectResponse("user not found","404"))
       }
-      const user = deletedUser
       resolve(Service.successResponse({
         id
       }));
@@ -106,60 +105,10 @@ const usersPOST = ( user ) => new Promise(
     }
   },
 );
-/**
-* Modify the profile picture of a user
-*
-* userProfilePicture UserProfilePicture 
-* no response value expected for this operation
-* */
-const usersProfilePicturePATCH = (user) => new Promise(
-  async (resolve, reject) => {
-    try {
-      console.log("logging:", user)
-      const {id, profilePicture} = user
-      const updatedUser = await users.update({profilePicture: profilePicture}, {where: {id: id}})
-      if(updatedUser[0] === 0){
-        return reject(Service.rejectResponse("User not found", "404"))
-      }
-      resolve(Service.successResponse({
-        user,
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
-/**
-* Adds a profile picture for a user
-*
-* userProfilePicture UserProfilePicture 
-* no response value expected for this operation
-* */
-const usersProfilePicturePOST = (user) => new Promise(
-  async (resolve, reject) => {
-    try {
-      const {id, profilePicture}= user.body.users
-      await users.update()
-      resolve(Service.successResponse({
-        userProfilePicture,
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
 
 module.exports = {
   usersIdDELETE,
   usersIdGET,
   usersIdPATCH,
   usersPOST,
-  usersProfilePicturePATCH,
-  usersProfilePicturePOST,
 };

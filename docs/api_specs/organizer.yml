@@ -8,7 +8,7 @@ servers:
   - url: http://localhost:8080/v1
 
 paths:
-  /organizer:
+  /organizers:
     post:
       summary: Adds a new organizer
       requestBody:
@@ -42,7 +42,7 @@ paths:
         '201':
           description: Organizer created successfully
   
-  /organizer/{id}:  
+  /organizers/{id}:  
     patch:
       summary: Modifies the info of an existing organizer
       parameters:
@@ -82,9 +82,16 @@ paths:
       responses:
         '201':
           description: Organizer modified successfully
-  /organizer/payment_info:
+  /organizers/payment_info/{id}:
     post:
       summary: Add payment details for an organizer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the event to reserve
       requestBody:
         required: true
         content:
@@ -142,7 +149,7 @@ paths:
                     type: string
                     example: "An unexpected error occurred."
 
-  /event:
+  /events:
     get:
       summary: Get all Events created by an organizer
       responses:
@@ -166,7 +173,7 @@ paths:
         '201':
           description: Event created successfully
 
-  /event/{id}:
+  /events/{id}:
     get:
       summary: Get an event by id
       parameters:
@@ -221,7 +228,7 @@ paths:
           description: Event not found
 
 
-  /event/{id}/capacity:
+  /events/{id}/capacity:
     get:
       summary: Get the remaining capacity of an event
       parameters:
@@ -239,7 +246,7 @@ paths:
               schema:
                 type: array
                 items:
-                $ref: '#/components/schemas/EventCapacity'
+                  $ref: '#/components/schemas/EventCapacity'
 
 components:
   schemas:
@@ -330,4 +337,3 @@ components:
         price:
           type: integer
           example: 500
- 
