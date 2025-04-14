@@ -3,7 +3,9 @@ info:
   title: Vendor service  API
   version: 1.0.0
   description: The application is divided into microservice, for each microservice there is a RESTful API created, this is the vendor service API
-
+servers: 
+  - url: http://localhost:8080/v1
+  
 paths:
   /vendor:
     post:
@@ -27,16 +29,12 @@ paths:
                 profile_picture:
                   type: string
                   description: profile picture for the performer
-                cover_picture:
-                  type: string
-                  description: cover picture for the performer
+               
 
               required:
                 - name
                 - genre
                 - biography
-                - profile_picture
-                - cover_picture
       responses:
         '201':
           description: Vendor registered successfully
@@ -72,9 +70,7 @@ paths:
                 profile_picture:
                   type: string
                   description: profile picture for the performer
-                cover_picture:
-                  type: string
-                  description: cover picture for the performer
+
       responses:
         '200':
           description: Reservation updated successfully

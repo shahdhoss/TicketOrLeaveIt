@@ -1,0 +1,53 @@
+/**
+ * The DefaultController file is a very simple one, which does not need to be changed manually,
+ * unless there's a case where business logic routes the request to an entity which is not
+ * the service.
+ * The heavy lifting of the Controller item is done in Request.js - that is where request
+ * parameters are extracted and sent to the service, and where response is handled.
+ */
+
+const Controller = require('./Controller');
+const service = require('../services/DefaultService');
+const vendorEventsEventIdVendorIdDELETE = async (request, response) => {
+  await Controller.handleRequest(request, response, service.vendorEventsEventIdVendorIdDELETE);
+};
+
+const vendorEventsEventIdVendorIdPATCH = async (request, response) => {
+  await Controller.handleRequest(request, response, service.vendorEventsEventIdVendorIdPATCH);
+};
+
+const vendorEventsIdGET = async (request, response) => {
+  await Controller.handleRequest(request, response, service.vendorEventsIdGET);
+};
+
+const vendorEventsPOST = async (request, response) => {
+  await Controller.handleRequest(request, response, service.vendorEventsPOST);
+};
+
+const vendorIdDELETE = async (request, response) => {
+  await Controller.handleRequest(request, response, service.vendorIdDELETE);
+};
+
+const vendorIdGET = async (request, response) => {
+  await Controller.handleRequest(request, response, service.vendorIdGET);
+};
+
+const vendorIdPATCH = async (request, response) => {
+  await Controller.handleRequest(request, response, service.vendorIdPATCH);
+};
+
+const vendorPOST = async (request, response) => {
+  await Controller.handleRequest(request, response, service.vendorPOST);
+};
+
+
+module.exports = {
+  vendorEventsEventIdVendorIdDELETE,
+  vendorEventsEventIdVendorIdPATCH,
+  vendorEventsIdGET,
+  vendorEventsPOST,
+  vendorIdDELETE,
+  vendorIdGET,
+  vendorIdPATCH,
+  vendorPOST,
+};
