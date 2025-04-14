@@ -82,6 +82,22 @@ paths:
           description: Reservation not found
         '500':
           description: Internal server error
+    get:
+      summary: Get vendor's info
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the vendor to update
+      responses:
+        '200':
+          description: Reservation gotten successfully
+        '404':
+          description: Reservation not found
+        '500':
+          description: Internal server error
 
 
 
@@ -150,6 +166,59 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Event"
+  
+  /vendor/events/{eventId}/{vendorId}:  
+    patch:
+      summary: Updates an events of a vendor
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the event
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the vendor to update 
+      
+      responses:
+        200:
+          description: Successfully retrieved events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vendor_id:
+                    type: integer
+                    example: 123
+                  events:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Event"
+    delete:
+      summary: Deletes an event for a vendor
+      parameters:
+          - name: eventId
+            in: path
+            required: true
+            schema:
+              type: integer
+            description: ID of the event
+          - name: vendorId
+            in: path
+            required: true
+            schema:
+              type: integer
+            description: ID of the vendor to update 
+        
+      responses:
+        200:
+          description: Successfully retrieved events
+    
 
 components:
   schemas:
