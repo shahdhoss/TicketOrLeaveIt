@@ -4,7 +4,6 @@ const ExpressServer = require('./expressServer');
 const {sequelize} = require("./models")
 const express = require('express');
 const app = express()
-const eventRouter = require("./routers/eventRouter");
 const organizerRouter = require("./routers/organizerRouter")
 
 const launchServer = async () => {

@@ -2,126 +2,6 @@
 const Service = require('./Service');
 const {organizers} = require("../models")
 /**
-* Get all Events created by an organizer
-*
-* returns List
-* */
-const eventsGET = () => new Promise(
-  async (resolve, reject) => {
-    try {
-      resolve(Service.successResponse({
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
-/**
-* Get the remaining capacity of an event
-*
-* id Integer ID of the event to retrieve
-* returns List
-* */
-const eventsIdCapacityGET = ({ id }) => new Promise(
-  async (resolve, reject) => {
-    try {
-      resolve(Service.successResponse({
-        id,
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
-/**
-* Delete an event by id
-*
-* id Integer Deletes an event using event id
-* no response value expected for this operation
-* */
-const eventsIdDELETE = ({ id }) => new Promise(
-  async (resolve, reject) => {
-    try {
-      resolve(Service.successResponse({
-        id,
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
-/**
-* Get an event by id
-*
-* id Integer ID of the event to retrieve
-* returns Event
-* */
-const eventsIdGET = ({ id }) => new Promise(
-  async (resolve, reject) => {
-    try {
-      resolve(Service.successResponse({
-        id,
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
-/**
-* Partially update an event
-*
-* id Integer ID of the event to update
-* eventUpdate EventUpdate 
-* no response value expected for this operation
-* */
-const eventsIdPATCH = ({ id, eventUpdate }) => new Promise(
-  async (resolve, reject) => {
-    try {
-      resolve(Service.successResponse({
-        id,
-        eventUpdate,
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
-/**
-* Add a new event
-*
-* event Event 
-* no response value expected for this operation
-* */
-const eventsPOST = ( event ) => new Promise(
-  async (resolve, reject) => {
-    try {
-      resolve(Service.successResponse({
-        event,
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
-/**
 * Modifies the info of an existing organizer
 *
 * id Integer ID of the organizer to modify
@@ -232,12 +112,6 @@ const organizersIdGET = (id) => new Promise(
 );
 
 module.exports = {
-  eventsGET,
-  eventsIdCapacityGET,
-  eventsIdDELETE,
-  eventsIdGET,
-  eventsIdPATCH,
-  eventsPOST,
   organizersIdPATCH,
   organizersPOST,
   organizersIdDelete,
