@@ -1,86 +1,184 @@
-/* eslint-disable no-unused-vars */
 const Service = require('./Service');
-const db = require('../C:\Users\Rana7\OneDrive\Desktop\TicketOrLevet project\TicketOrLeaveIt\ticket-service\models');
+const db = require('./models');
 const Reservation = db.Reservation;
-/**
-* Get the event history of a user
-*
-* returns List
-* */
+const Hold = db.Hold;
+
 const historyGET = () => new Promise(
   async (resolve, reject) => {
     try {
-      resolve(Service.successResponse({
-      }));
+
+const userId = 1; 
+
+
+const userReservations = await Reservation.findAll({
+  where: {
+    userId: userId 
+  },
+
+  order: [
+    ['createdAt', 'DESC']
+  ]
+
+});
+
+
+
+const historyData = userReservations.map(reservation => reservation.toJSON()); // Get plain objects
+
+
+
+
+resolve(Service.successResponse(historyData, 200));
+
+
     } catch (e) {
+      console.error("Error in historyGET:", e); // Log the error
       reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
+        e.message || 'Internal Server Error retrieving history.',
+        e.status || 500
       ));
     }
   },
 );
-/**
-* Delete the holding of a ticket after it being fully reserved
-*
-* id Integer Deletes an event reservation using reservation id
-* no response value expected for this operation
-* */
+
 const holdIdDELETE = ({ id }) => new Promise(
   async (resolve, reject) => {
     try {
-      resolve(Service.successResponse({
-        id,
-      }));
+     
+    const holdId = id; 
+
+    
+    const userId = 1; 
+
+ 
+    const hold = await Hold.findByPk(holdId);
+
+    
+    if (!hold) {
+
+      return reject(Service.rejectResponse(
+        'Hold not found',
+        404 
+      ));
+    }
+
+ 
+    await hold.destroy();
+
+    
+    resolve(Service.successResponse(null, 204)); 
+
+    
     } catch (e) {
+      console.error("Error in holdIdDELETE:", e); // Log the specific error
       reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
+        e.message || 'Internal Server Error deleting hold.', // Contextual error message
+        e.status || 500
       ));
     }
   },
 );
-/**
-* Update a user's ticket holding
-*
-* id Integer ID of the reservation to update
-* reserveIdPatchRequest ReserveIdPatchRequest 
-* no response value expected for this operation
-* */
+
 const holdIdPATCH = ({ id, reserveIdPatchRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      resolve(Service.successResponse({
-        id,
-        reserveIdPatchRequest,
-      }));
+    
+const holdId = id; 
+const requestBody = reserveIdPatchRequest; 
+
+
+const userId = 1; 
+
+
+const hold = await Hold.findByPk(holdId);
+
+
+if (!hold) {
+  return reject(Service.rejectResponse('Hold not found', 404));
+}
+
+
+let changed = false; 
+if (requestBody.quantity !== undefined) {
+  if (requestBody.quantity <= 0) {
+      return reject(Service.rejectResponse('Quantity must be positive', 400));
+  }
+  hold.quantity = requestBody.quantity;
+  changed = true;
+}
+if (requestBody.seat_type !== undefined) {
+  hold.seatType = requestBody.seat_type;
+  changed = true;
+}
+if (requestBody.seat_number !== undefined) {
+  hold.seatNumber = requestBody.seat_number;
+  changed = true;
+}
+
+
+if (changed) {
+  await hold.save();
+}
+
+
+resolve(Service.successResponse(hold.toJSON(), 200));
+
+
     } catch (e) {
+      console.error("Error in holdIdPATCH:", e); // Log the specific error for debugging
       reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
+        e.message || 'Internal Server Error updating hold.', // Provide context in the error message
+        e.status || 500 
       ));
     }
   },
 );
-/**
-* Hold a ticket or a number of tickets using reservation id
-*
-* id Integer ID of the event to reserve
-* reserveIdPostRequest ReserveIdPostRequest 
-* no response value expected for this operation
-* */
+
 const holdIdPOST = ({ id, reserveIdPostRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      resolve(Service.successResponse({
-        id,
-        reserveIdPostRequest,
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
+      
+    const eventId = id; 
+   
+    const requestBody = reserveIdPostRequest; 
+
+
+    const { quantity, seat_type, seat_number } = requestBody;
+
+    
+    const userId = 1;
+
+  
+    if (!quantity || quantity <= 0 || !seat_type || !seat_number) {
+      return reject(Service.rejectResponse(
+        'Missing or invalid hold data (quantity, seat_type, seat_number)',
+        400 
       ));
+    }
+
+
+    const HOLD_DURATION_MS = 15 * 60 * 1000; 
+    const expiresAt = new Date(Date.now() + HOLD_DURATION_MS);
+
+    const newHold = await Hold.create({
+      eventId: eventId,         // from path param 'id'
+      userId: userId,           // Use the actual authenticated user ID here later
+      quantity: quantity,       // from request body
+      seatType: seat_type,      // map spec 'seat_type' to model 'seatType'
+      seatNumber: seat_number,  // map spec 'seat_number' to model 'seatNumber'
+      expiresAt: expiresAt      // Store the calculated expiry time
+    });
+
+    
+    resolve(Service.successResponse(newHold.toJSON(), 201)); 
+
+    
+    } catch (e) {
+     
+     console.error("Error in holdIdPOST:", e); 
+     reject(Service.rejectResponse(
+       e.message || 'Internal Server Error creating hold.', 
+       e.status || 500));
     }
   },
 );
@@ -122,64 +220,81 @@ resolve(Service.successResponse(null, 204));
     }
   },
 );
-/**
-* Update a user's event reservation
-*
-* id Integer ID of the reservation to update
-* reserveIdPatchRequest ReserveIdPatchRequest 
-* no response value expected for this operation
-* */
+
 const reserveIdPATCH = ({ id, reserveIdPatchRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      resolve(Service.successResponse({
-        id,
-        reserveIdPatchRequest,
-      }));
+    
+const reservationId = id; 
+const requestBody = reserveIdPatchRequest; 
+
+
+const userId = 1; 
+
+
+const reservation = await Reservation.findByPk(reservationId);
+
+
+if (!reservation) {
+  return reject(Service.rejectResponse(
+    'Reservation not found',
+    404 
+  ));
+}
+
+
+if (requestBody.quantity !== undefined) {
+  if (requestBody.quantity <= 0) {
+      return reject(Service.rejectResponse('Quantity must be positive', 400));
+  }
+  reservation.quantity = requestBody.quantity;
+}
+if (requestBody.seat_type !== undefined) {
+  reservation.seatType = requestBody.seat_type; // Map to model field name
+}
+if (requestBody.seat_number !== undefined) {
+  reservation.seatNumber = requestBody.seat_number; // Map to model field name
+}
+
+await reservation.save();
+
+
+resolve(Service.successResponse(reservation.toJSON(), 200)); 
+
+
     } catch (e) {
+      console.error("Error in reserveIdPATCH:", e); // Log the error
       reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
+        e.message || 'Internal Server Error updating reservation.',
+        e.status || 500
       ));
     }
   },
 );
-/**
-* Reserve an event by event id
-*
-* id Integer ID of the event to reserve
-* reserveIdPostRequest ReserveIdPostRequest 
-* no response value expected for this operation
-* */
+
 const reserveIdPOST = ({ id, reserveIdPostRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       
 
-      // 1. Extract data from input parameters
-      const eventId = id; // The event ID from the path parameter
-      const requestBody = reserveIdPostRequest; // The parsed JSON request body
 
-      // Extract required fields from the request body
-      // Make sure these names match the properties in your openapi spec's request body schema
+      const eventId = id; 
+      const requestBody = reserveIdPostRequest; 
+
       const { quantity, seat_type, seat_number } = requestBody;
 
-      // --- IMPORTANT: Authentication ---
-      // Using a placeholder user ID. Replace with real user ID logic later.
-      const userId = 1; // <<< --- PLACEHOLDER - REPLACE LATER --- >>>
 
-      // 2. Basic Validation
+      const userId = 1; 
+
+      
       if (!quantity || quantity <= 0 || !seat_type || !seat_number) {
         return reject(Service.rejectResponse(
           'Missing or invalid reservation data (quantity, seat_type, seat_number)',
-          400 // Bad Request status code
+          400 
         ));
       }
 
-      // --- Optional: Add checks here if needed (e.g., call Event service) ---
-
-
-      // 3. Create Reservation in Database using Sequelize
+     
       const newReservation = await Reservation.create({
         eventId: eventId,         // from path param 'id'
         userId: userId,           // Use the actual authenticated user ID here later
