@@ -84,23 +84,41 @@ const holdIdPOST = ({ id, reserveIdPostRequest }) => new Promise(
     }
   },
 );
-/**
-* Delete an event reservation of a user by reservation id
-*
-* id Integer Deletes an event reservation using reservation id
-* no response value expected for this operation
-* */
+
 const reserveIdDELETE = ({ id }) => new Promise(
   async (resolve, reject) => {
     try {
-      resolve(Service.successResponse({
-        id,
-      }));
-    } catch (e) {
+    
+const reservationId = id; 
+
+
+const userId = 1; 
+
+
+const reservation = await Reservation.findByPk(reservationId);
+
+
+if (!reservation) {
+ 
+  return reject(Service.rejectResponse(
+    'Reservation not found',
+    404 
+  ));
+}
+
+
+await reservation.destroy();
+
+
+resolve(Service.successResponse(null, 204)); 
+
+    } catch (e)
+     {
+      console.error("Error in reserveIdDELETE:", e); // Log the error
       reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
+        e.message || 'Internal Server Error deleting reservation.',
+        e.status || 500));
+     
     }
   },
 );
