@@ -21,31 +21,6 @@ paths:
         '201':
           description: User created successfully
 
-  /users/profile-picture:
-      post:
-        summary: Adds a profile picture for a user
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/userProfilePicture'
-        responses:
-          '200':
-            description: User profile picture added successfully
-  
-      patch:
-        summary: Modify the profile picture of a user
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/userProfilePicture'
-        responses:
-          '200':
-            description: User profile picture modified successfully
-
   /users/{id}:
     get:
       summary: Get a user by id
@@ -115,12 +90,3 @@ components:
           type: string
           example: "shahdshahd"
           
-    userProfilePicture:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        picture:
-          type: string
-          example: "data:image/jpeg;base64"

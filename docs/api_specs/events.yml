@@ -75,27 +75,6 @@ paths:
         '404':
           description: Event not found
 
-
-  /events/{id}/capacity:
-    get:
-      summary: Get the remaining capacity of an event
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-          description: ID of the event to retrieve
-      responses:
-        '200':
-          description: Gets an event using event id
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/EventCapacity'
-
 components:
   schemas:
     Event:
@@ -153,12 +132,6 @@ components:
         price:
           type: integer
           example: 250
-    EventCapacity:
-      type: object
-      properties:
-        capacity:
-          type: integer
-          example: 100
     EventHistory :
       type: object
       properties:
