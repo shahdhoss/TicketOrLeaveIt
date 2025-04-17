@@ -1,0 +1,208 @@
+openapi: 3.0.0
+info:
+  description: "The application is divided into microservice, for each microservice\
+    \ there is a RESTful API created, this is the organizer API"
+  title: Events API
+  version: 1.0.0
+servers:
+- url: http://localhost:8080/v1
+paths:
+  /events:
+    post:
+      operationId: eventsPOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+        required: true
+      responses:
+        "201":
+          description: Event created successfully
+      summary: Add a new event
+      x-eov-operation-handler: controllers/DefaultController
+  /events/{id}:
+    delete:
+      operationId: eventsIdDELETE
+      parameters:
+      - description: Deletes an event using event id
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "204":
+          description: Event deleted successfully
+        "404":
+          description: Event not found
+      summary: Delete an event by id
+      x-eov-operation-handler: controllers/DefaultController
+    get:
+      operationId: eventsIdGET
+      parameters:
+      - description: ID of the event to retrieve
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: Gets an event using event id
+      summary: Get an event by id
+      x-eov-operation-handler: controllers/DefaultController
+    patch:
+      operationId: eventsIdPATCH
+      parameters:
+      - description: ID of the event to update
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventUpdate'
+        required: true
+      responses:
+        "204":
+          description: Event updated successfully
+        "404":
+          description: Event not found
+      summary: Partially update an event
+      x-eov-operation-handler: controllers/DefaultController
+components:
+  schemas:
+    Event:
+      example:
+        images:
+        - https://example.com/event-image.jpg
+        - https://example.com/event-image.jpg
+        event_type: Concert
+        artist: Helena Hauff
+        event_location: Arena
+        ticket_types:
+        - price: 500.0
+          type: VIP
+        - price: 500.0
+          type: VIP
+        event_address: ElSawy Culture Wheel
+        description: "Expect pulsating beats, minimal lighting, and a stripped-back\
+          \ industrial setting that will transport you straight to the roots of Berlin’\
+          s legendary rave culture."
+        dates:
+        - 2025-07-10T19:30:00Z
+        - 2025-07-10T19:30:00Z
+        city_location: Cairo
+        capacity: 200
+      properties:
+        event_type:
+          example: Concert
+          type: string
+        event_location:
+          example: Arena
+          type: string
+        event_address:
+          example: ElSawy Culture Wheel
+          type: string
+        artist:
+          example: Helena Hauff
+          type: string
+        description:
+          example: "Expect pulsating beats, minimal lighting, and a stripped-back\
+            \ industrial setting that will transport you straight to the roots of\
+            \ Berlin’s legendary rave culture."
+          type: string
+        dates:
+          items:
+            example: 2025-07-10T19:30:00Z
+            format: date-time
+            type: string
+          type: array
+        city_location:
+          example: Cairo
+          type: string
+        capacity:
+          example: 200
+          type: integer
+        ticket_types:
+          items:
+            $ref: '#/components/schemas/Event_ticket_types_inner'
+          type: array
+        images:
+          items:
+            example: https://example.com/event-image.jpg
+            format: uri
+            type: string
+          type: array
+      type: object
+    EventUpdate:
+      example:
+        price: 250
+      properties:
+        price:
+          example: 250
+          type: integer
+      type: object
+    EventCapacity:
+      example:
+        capacity: 100
+      properties:
+        capacity:
+          example: 100
+          type: integer
+      type: object
+    EventHistory:
+      properties:
+        type:
+          example: Concert
+          type: string
+        artist:
+          example: Helena Hauff
+          type: string
+        description:
+          example: "Expect pulsating beats, minimal lighting, and a stripped-back\
+            \ industrial setting that will transport you straight to the roots of\
+            \ Berlin’s legendary rave culture."
+          type: string
+        dates:
+          items:
+            format: date-time
+            type: string
+          type: array
+        location:
+          example: Cairo
+          type: string
+        capacity:
+          example: 200
+          type: integer
+        price:
+          example: 500
+          type: integer
+      type: object
+    Event_ticket_types_inner:
+      example:
+        price: 500.0
+        type: VIP
+      properties:
+        type:
+          example: VIP
+          type: string
+        price:
+          example: 500.0
+          format: float
+          type: number
+      type: object

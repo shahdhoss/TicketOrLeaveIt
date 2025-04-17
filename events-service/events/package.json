@@ -1,7 +1,7 @@
 {
-  "name": "vendor-service-api",
+  "name": "events-api",
   "version": "1.0.0",
-  "description": "The application is divided into microservice, for each microservice there is a RESTful API created, this is the vendor service API",
+  "description": "The application is divided into microservice, for each microservice there is a RESTful API created, this is the organizer API",
   "main": "index.js",
   "scripts": {
     "prestart": "npm install",
