@@ -8,22 +8,6 @@
 
 const Controller = require('./Controller');
 const service = require('../services/DefaultService');
-const vendorEventsEventIdVendorIdDELETE = async (request, response) => {
-  await Controller.handleRequest(request, response, service.vendorEventsEventIdVendorIdDELETE);
-};
-
-const vendorEventsEventIdVendorIdPATCH = async (request, response) => {
-  await Controller.handleRequest(request, response, service.vendorEventsEventIdVendorIdPATCH);
-};
-
-const vendorEventsIdGET = async (request, response) => {
-  await Controller.handleRequest(request, response, service.vendorEventsIdGET);
-};
-
-const vendorEventsPOST = async (request, response) => {
-  await Controller.handleRequest(request, response, service.vendorEventsPOST);
-};
-
 const vendorIdDELETE = async (request, response) => {
   await Controller.handleRequest(request, response, service.vendorIdDELETE);
 };
@@ -42,10 +26,6 @@ const vendorPOST = async (request, response) => {
 
 
 module.exports = {
-  vendorEventsEventIdVendorIdDELETE,
-  vendorEventsEventIdVendorIdPATCH,
-  vendorEventsIdGET,
-  vendorEventsPOST,
   vendorIdDELETE,
   vendorIdGET,
   vendorIdPATCH,

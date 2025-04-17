@@ -2,8 +2,7 @@
 const {events} = require('../models');
 const Service = require('./Service');
 const vendorClient = require("../grpcClient");
-const { where } = require('sequelize');
-
+const withBreaker = require("../circuit-breaker/breaker")
 /**
 * Delete an event by id
 *
@@ -125,8 +124,20 @@ const eventsPOST = (event) => new Promise(
 
 
 module.exports = {
-  eventsIdDELETE,
-  eventsIdGET,
-  eventsIdPATCH,
-  eventsPOST,
+  eventsIdDELETE:(id)=>
+    withBreaker(eventsIdDELETE)(id).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || 'Invalid input', e.status || 405)
+    )),
+  eventsIdGET:(id)=>
+    withBreaker(eventsIdGET)(id).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || 'Invalid input', e.status || 405)
+    )),
+  eventsIdPATCH:(id)=>
+    withBreaker(eventsIdPATCH)(id).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || 'Invalid input', e.status || 405)
+    )),
+  eventsPOST:(event)=>
+    withBreaker(eventsPOST)(event).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || 'Invalid input', e.status || 405)
+    )),
 };

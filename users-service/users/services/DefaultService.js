@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
 const {users}= require("../models");
+const withBreaker = require("../circuit_breaker/breaker");
 const { use } = require('chai');
-
 /**
 * Delete a user by id
 *
@@ -106,9 +106,23 @@ const usersPOST = ( user ) => new Promise(
   },
 );
 
+
 module.exports = {
-  usersIdDELETE,
-  usersIdGET,
-  usersIdPATCH,
-  usersPOST,
+  usersIdDELETE:(id)=>
+    withBreaker(usersIdDELETE)(id).catch((e)=> Promise.reject(
+      Service.rejectResponse(e.message || "Invalid input", e.status|| 405)
+    )),
+  
+  usersIdGET:(id)=>
+    withBreaker(usersIdGET)(id).catch((e)=> Promise.reject(
+      Service.rejectResponse(e.message || "invalid input", e.status ||405)
+    )),
+  usersIdPATCH:(id)=>
+    withBreaker(usersIdPATCH)(id).catch((e)=> Promise.reject(
+      Service.rejectResponse(e.message || "invalid input", e.status ||405)
+    )),
+  usersPOST:(user)=>
+    withBreaker(usersPOST)(user).catch((e)=> Promise.reject(
+      Service.rejectResponse(e.message || "invalid input", e.status ||405)
+    )),
 };

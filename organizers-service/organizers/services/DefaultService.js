@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
 const {organizers} = require("../models")
+const withBreaker = require("../circuit-breaker/breaker")
 /**
 * Modifies the info of an existing organizer
 *
@@ -112,8 +113,20 @@ const organizersIdGET = (id) => new Promise(
 );
 
 module.exports = {
-  organizersIdPATCH,
-  organizersPOST,
-  organizersIdDelete,
-  organizersIdGET
+  organizersIdPATCH: (id)=>
+    withBreaker(organizersIdPATCH)(id).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || 'Invalid input', e.status || 405)
+    )),
+  organizersPOST:(orgainzer)=>
+    withBreaker(organizersPOST)(orgainzer).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || 'Invalid input', e.status || 405)
+    )),
+  organizersIdDelete:(id)=>
+    withBreaker(organizersIdDelete)(id).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || 'Invalid input', e.status || 405)
+    )),
+  organizersIdGET:(id)=>
+    withBreaker(organizersIdGET)(id).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || 'Invalid input', e.status || 405)
+    )),
 };

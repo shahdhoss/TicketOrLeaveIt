@@ -1,91 +1,7 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
 const {vendors}= require("../models");
-const { where } = require('sequelize');
-/**
-* Deletes an event for a vendor
-*
-* eventId Integer ID of the event
-* vendorId Integer ID of the vendor to update
-* no response value expected for this operation
-* */
-const vendorEventsEventIdVendorIdDELETE = ({ eventId, vendorId }) => new Promise(
-  async (resolve, reject) => {
-    try {
-      resolve(Service.successResponse({
-        eventId,
-        vendorId,
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
-/**
-* Updates an events of a vendor
-*
-* eventId Integer ID of the event
-* vendorId Integer ID of the vendor to update
-* returns _vendor_events__id__get_200_response
-* */
-const vendorEventsEventIdVendorIdPATCH = ({ eventId, vendorId }) => new Promise(
-  async (resolve, reject) => {
-    try {
-      resolve(Service.successResponse({
-        eventId,
-        vendorId,
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
-/**
-* Gets all events of a vendor
-*
-* id Integer ID of the vendor to update
-* returns _vendor_events__id__get_200_response
-* */
-const vendorEventsIdGET = ({ id }) => new Promise(
-  async (resolve, reject) => {
-    try {
-      resolve(Service.successResponse({
-        id,
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
-/**
-* Registering the upcoming events for a vendor
-*
-* vendorEventsPostRequest VendorEventsPostRequest 
-* no response value expected for this operation
-* */
-const vendorEventsPOST = ({ vendorEventsPostRequest }) => new Promise(
-  async (resolve, reject) => {
-    try {
-      resolve(Service.successResponse({
-        vendorEventsPostRequest,
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
+const withBreaker = require("../circuit_breaker/breaker")
 /**
 * Delete a vendor by vendor id
 *
@@ -189,13 +105,26 @@ const vendorPOST = (vendor) => new Promise(
   },
 );
 
+//wrapping the functions in circuit breaker 
+
 module.exports = {
-  vendorEventsEventIdVendorIdDELETE,
-  vendorEventsEventIdVendorIdPATCH,
-  vendorEventsIdGET,
-  vendorEventsPOST,
-  vendorIdDELETE,
-  vendorIdGET,
-  vendorIdPATCH,
-  vendorPOST,
+  vendorIdDELETE: (id) =>
+    withBreaker(vendorIdDELETE)(id).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || 'Invalid input', e.status || 405)
+    )),
+
+  vendorIdGET: (id) =>
+    withBreaker(vendorIdGET)(id).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || 'Invalid input', e.status || 405)
+    )),
+
+  vendorIdPATCH: (id) =>
+    withBreaker(vendorIdPATCH)(id).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || 'Invalid input', e.status || 405)
+    )),
+
+  vendorPOST: (vendor) =>
+    withBreaker(vendorPOST)(vendor).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || 'Invalid input', e.status || 405)
+    )),
 };
