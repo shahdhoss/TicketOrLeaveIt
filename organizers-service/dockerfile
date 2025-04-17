@@ -1,0 +1,8 @@
+FROM node:18-slim
+
+WORKDIR /app
+COPY organizers/package*.json ./
+RUN npm install
+COPY organizers/ .
+EXPOSE 8080
+CMD ["node", "index.js"] 

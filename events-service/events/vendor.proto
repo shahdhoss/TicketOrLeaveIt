@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package vendor;
+
+message GetVendorByNameRequest{
+    string name = 1;
+}
+
+message Vendor {
+    string id = 1;
+    string name = 2;  
+}
+
+service VendorService {
+    rpc GetVendorByName (GetVendorByNameRequest) returns (Vendor); 
+}

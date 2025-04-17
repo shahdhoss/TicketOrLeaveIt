@@ -1,0 +1,8 @@
+FROM node:18-slim
+
+WORKDIR /app
+COPY users/package*.json ./
+RUN npm install
+COPY users/ .
+EXPOSE 8080
+CMD [ "node","index.js"  ]

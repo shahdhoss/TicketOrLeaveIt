@@ -1,0 +1,109 @@
+services:
+  redis:
+      image: redis:7
+      container_name: redis
+      ports:
+        - "6379:6379"
+  user-service:
+    build:
+      context: ./users-service
+      dockerfile: dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      DB_HOST: user-db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: users
+    depends_on:
+      - user-db
+
+  user-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: users
+    volumes:
+      - users_pgdata:/var/lib/postgresql/data
+  
+  vendor-service:
+    build:
+      context: ./vendor-service
+      dockerfile: dockerfile
+    ports:
+      - "8082:8080"
+      -  "50051:50051"
+    environment:
+      DB_HOST: vendor-db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: vendor
+    depends_on:
+      - vendor-db
+
+  vendor-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: vendor
+    volumes:
+      - vendor_pgdata:/var/lib/postgresql/data
+  
+  organizers-service:
+    build:
+      context: ./organizers-service
+      dockerfile: dockerfile
+    ports:
+      - "8083:8080"
+    environment:
+      DB_HOST: organizer-db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: organizers
+    depends_on:
+      - organizer-db
+
+  organizer-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: organizers
+    volumes:
+      - organizers_pgdata:/var/lib/postgresql/data
+  
+  events-service:
+    build:
+      context: ./events-service
+      dockerfile: dockerfile
+    ports:
+      - "8084:8080"
+    environment:
+      DB_HOST: events-db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: events
+    depends_on:
+      - events-db
+      - vendor-service
+
+  events-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: events
+    volumes:
+      - events_pgdata:/var/lib/postgresql/data
+
+volumes:
+  users_pgdata:
+  vendor_pgdata:
+  organizers_pgdata:
+  events_pgdata:
