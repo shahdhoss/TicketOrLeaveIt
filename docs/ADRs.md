@@ -28,7 +28,7 @@ We will adopt a microservices architecture, with dedicated services for authenti
 ---
 
 
-# ADR 002: Choosing GoLang as the Main Coding Language
+# ADR 002: Choosing GoLang and Nodejs as main Languages
 
 **Status:** Accepted
 
@@ -36,7 +36,8 @@ We will adopt a microservices architecture, with dedicated services for authenti
 Our system is built on a microservices architecture, requiring a programming language that is efficient, scalable, and well-suited for distributed systems. We need to choose a language that aligns with our goals of high performance, ease of development, and maintainability.
 
 **Decision:**
-We will use **Go (Golang)** as the primary programming language for developing our microservices.
+We will use **Go (Golang)** in services that needs high Concurrency and also the other main properties that golang support 
+we will use **(Nodejs)** in services that have high requests exchanging 
 
 **Rationale:**
 - **Performance:** Go is a statically typed, compiled language known for its high performance and low latency, making it ideal for handling high-concurrency scenarios common in microservices.
@@ -111,7 +112,7 @@ We will implement **graceful degradation** to maintain partial functionality dur
 
 ---
 
-## ADR 005: Load Balancing (Nginx)
+## ADR 005: Load Balancing (Proxy)
 
 **Status:** Proposed
 
@@ -119,10 +120,10 @@ We will implement **graceful degradation** to maintain partial functionality dur
 To distribute incoming traffic across multiple servers and ensure no single server is overwhelmed, we need to implement load balancing.
 
 **Decision:**
-We will use Nginx for load balancing and Redis for session storage and caching.
+We will use Proxy for load balancing and Redis for session storage and caching.
 
 **Rationale:**
-- **Performance:** Nginx is a high-performance load balancer that can handle thousands of concurrent connections.
+- **Performance:** Proxy is a high-performance load balancer that can handle thousands of concurrent connections.
 - **Scalability:** Redis supports distributed caching, improving performance and scalability.
 
 **Consequences:**
@@ -207,7 +208,8 @@ We will implement dedicated PostgreSQL databases for each microservice, with no 
 Our microservices architecture needs to handle failures gracefully and prevent cascading failures when dependent services become unavailable or exhibit high latency.
 
 **Decision:**
-We will implement the Circuit Breaker pattern for inter-service communication to improve system resilience.
+We will implement the Circuit Breaker pattern for inter-service communication using **(opossum)** to improve system resilience.
+- opossum : A lightweight, Node.js circuit breaker library that provides Auto-Recovery, Real-Time Monitoring , Fallback Support and Prevents Cascading Failures
 
 **Rationale:**
 - Prevents cascading failures across microservices

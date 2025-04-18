@@ -27,6 +27,7 @@
     "openapi-sampler": "^1.0.0-beta.15",
     "opossum": "^8.4.0",
     "pg": "^8.14.1",
+    "redis": "^4.7.0",
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.2",
     "swagger-ui-express": "^4.0.2",

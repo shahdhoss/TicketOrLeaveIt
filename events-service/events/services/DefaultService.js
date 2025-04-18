@@ -3,6 +3,7 @@ const {events} = require('../models');
 const Service = require('./Service');
 const vendorClient = require("../grpcClient");
 const withBreaker = require("../circuit-breaker/breaker")
+const redisclient = require("../redisClient")
 /**
 * Delete an event by id
 *
@@ -38,12 +39,20 @@ const eventsIdGET = ( id ) => new Promise(
   async (resolve, reject) => {
     try {
       const eventId = id.id
+      const cacheKey = `event:${eventId}`
+      const cachedEvent = await redisclient.get(cacheKey);
+      if (cachedEvent) {
+        return resolve(Service.successResponse({
+          event: JSON.parse(cachedEvent),
+        }));
+      }
       const event = await events.findOne({where:{id:eventId}})
       if(!event){
         reject(Service.rejectResponse("event not found", 404))
       }
       const { organizer_id, vendorId, type, facility, address, description, date, city, capacity, ticket_types } = event
       const eventData = { organizer_id, vendor_id: vendorId, type, facility, address, description, date, city, capacity, ticket_types }
+      await redisclient.set(cacheKey, JSON.stringify(eventData), {EX: 600 });
       resolve(Service.successResponse({
         event: eventData,
       }));
@@ -72,7 +81,8 @@ const eventsIdPATCH = (id) => new Promise(
         reject(Service.rejectResponse("event not found","404"))
       }
       resolve(Service.successResponse({
-        eventUpdate:eventData
+        eventUpdate:eventData,
+        id:eventId
       }));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -114,6 +124,7 @@ const eventsPOST = (event) => new Promise(
         event: eventData,
       }));
     } catch (e) {
+      console.log(e)
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
