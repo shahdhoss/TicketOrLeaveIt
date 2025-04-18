@@ -66,9 +66,9 @@ func main() {
 
 	// Route configuration
 	r.PathPrefix("/v1/users").Handler(reverseProxy("http://user-service:8080"))
-	r.PathPrefix("/api/vendors").Handler(reverseProxy("http://vendor-service:8080"))
-	r.PathPrefix("/api/organizers").Handler(reverseProxy("http://organizers-service:8080"))
-	r.PathPrefix("/api/events").Handler(reverseProxy("http://events-service:8080"))
+	r.PathPrefix("/v1/vendor").Handler(reverseProxy("http://vendor-service:8080"))
+	r.PathPrefix("/v1/organizers").Handler(reverseProxy("http://organizers-service:8080"))
+	r.PathPrefix("/v1/events").Handler(reverseProxy("http://events-service:8080"))
 	r.PathPrefix("/api/payments").Handler(reverseProxy("http://payment-service:8081"))
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
