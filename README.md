@@ -10,3 +10,8 @@ The users, vendors, organizers, and events microservices have been built using E
 Key components of each service can found in DefaultServices, routers, models, circuit breaker and index.js
 
 A gRPC communication has been included between the events service and the vendor service 
+# This order
+docker-compose up -d --build payment-db user-db vendor-db organizer-db events-db redis
+docker-compose up -d --build payment-service user-service vendor-service organizers-service events-service
+docker-compose up -d --build payment-service user-service vendor-service organizers-service events-service
+docker-compose up -d --build load-balancer
