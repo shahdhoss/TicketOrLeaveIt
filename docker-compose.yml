@@ -8,6 +8,34 @@ services:
     environment:
       REDIS_HOST: redis     
 
+  Auth:
+    build: 
+      context: ./Auth
+      dockerfile: dockerfile
+    container_name: Auth
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - auth-db
+    restart: unless-stopped
+
+  auth-db:
+    image: postgres:15
+    container_name: auth-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: tickets
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+
+
   load-balancer:
     image: haproxy:2.8
     ports:
@@ -171,3 +199,4 @@ volumes:
   redis_data:
   events_pgdata:
   payment_pgdata:
+  pgdata:
