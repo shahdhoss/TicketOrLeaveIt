@@ -29,11 +29,9 @@ It also supports distributed systems, making it scalable for high-traffic scenar
 - Reduces the impact of failures on the overall user experience.
 - Provides time for recovery without completely shutting down the system.
 ---
-# 3) Load Balancing (NginX):-
+# 3) Load Balancing (haproxy):-
 #### Load balancing is crucial for distributing incoming traffic across multiple servers to ensure no single server is overwhelmed. This is especially important during peak times, such as when tickets for a popular event go on sale.
 
-- **Nginx :** Nginx is a high-performance load balancer that can handle thousands of concurrent connections. It supports Layer 7 load balancing,
-which allows for advanced routing based on URLs, headers, and cookies.
 
 - **Redis :** Redis is used for session storage and caching, which helps in maintaining session persistence and reducing the load on backend servers.
 It also supports distributed caching, which improves performance and scalability.
@@ -50,6 +48,7 @@ It also supports distributed caching, which improves performance and scalability
 updating user notifications, or processing background jobs.
 
 - **REST API:** REST APIs provide a standardized way for services to communicate with each other. They are stateless, scalable, and easy to integrate with other systems.
+- GRPC is used in communication betwwen services and each other 
 
 **How it Helps?**
 - Enables decoupling of services, making the system more modular and easier to maintain.
