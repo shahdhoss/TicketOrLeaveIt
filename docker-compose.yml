@@ -1,9 +1,71 @@
 services:
+  api-gateway-1:
+    build: ./api-gateway
+    environment:
+      REDIS_HOST: redis
+  api-gateway-2:
+    build: ./api-gateway
+    environment:
+      REDIS_HOST: redis     
+
+  load-balancer:
+    image: haproxy:2.8
+    ports:
+      - "80:80"
+      - "8404:8404"  
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - api-gateway-1
+      - api-gateway-2
+      - payment-service
+      - user-service
+      - vendor-service
+      - organizers-service
+      - events-service
+      - payment-db
+      - user-db
+      - vendor-db
+      - organizer-db
+      - events-db
+      - redis
+
   redis:
-      image: redis:7
-      container_name: redis
-      ports:
-        - "6379:6379"
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8081"
+    environment:
+      DB_HOST: payment-db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: 1234
+      DB_NAME: payment-db
+      NODE_ENV: development
+      PAYMOB_API_KEY: "ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2TVRBek9ERTFOQ3dpYm1GdFpTSTZJakUzTkRRNE16VTVOVGd1TmpFeU5EQTJJbjAuSkl3X2xsRmlRRmFMVWd5UTd1cXlhSHRFVndaVkV3dTBjTmNISW91LUZYQkRMRkRPTGpidTdiQVE5dGxMajE2V21MVHRKcTR5YmNReDF3ZEJMRVI4a3c="
+      PAYMOB_INTEGRATION_ID: "5056686"
+      PAYMOB_IFRAME_ID: "914522"
+    depends_on:
+      - payment-db
+
+  payment-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: payment-db
+    volumes:
+      - payment_pgdata:/var/lib/postgresql/data
+
   user-service:
     build:
       context: ./users-service
@@ -34,7 +96,7 @@ services:
       dockerfile: dockerfile
     ports:
       - "8082:8080"
-      -  "50051:50051"
+      - "50051:50051"
     environment:
       DB_HOST: vendor-db
       DB_PORT: 5432
@@ -106,4 +168,6 @@ volumes:
   users_pgdata:
   vendor_pgdata:
   organizers_pgdata:
+  redis_data:
   events_pgdata:
+  payment_pgdata:
