@@ -15,8 +15,10 @@ import (
 )
 
 var (
-	rdb     *redis.Client
-	limiter = rate.NewLimiter(rate.Every(time.Minute/100), 30) // 100 RPM
+	rdb          *redis.Client
+	limiter      = rate.NewLimiter(rate.Every(time.Minute/100), 30) // 100 RPM
+	jwtSecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))              // Same secret as auth-service
+
 )
 
 func init() {
@@ -64,12 +66,12 @@ func main() {
 	r := mux.NewRouter()
 	r.Use(rateLimit)
 
-	// Route configuration
 	r.PathPrefix("/v1/users").Handler(reverseProxy("http://user-service:8080"))
 	r.PathPrefix("/v1/vendor").Handler(reverseProxy("http://vendor-service:8080"))
 	r.PathPrefix("/v1/organizers").Handler(reverseProxy("http://organizers-service:8080"))
 	r.PathPrefix("/v1/events").Handler(reverseProxy("http://events-service:8080"))
 	r.PathPrefix("/api/payments").Handler(reverseProxy("http://payment-service:8081"))
+	r.PathPrefix("/auth").Handler(reverseProxy("http://auth-service:8000"))
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
