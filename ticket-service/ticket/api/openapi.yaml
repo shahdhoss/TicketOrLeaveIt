@@ -1,0 +1,117 @@
+openapi: 3.0.0
+info:
+  title: Ticket Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /tickets:
+    post:
+      summary: Create a new ticket
+      operationId: ticketsPOST
+      x-openapi-router-controller: DefaultController
+      x-openapi-router-service: DefaultService
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TicketInput'
+      responses:
+        '200':
+          description: Ticket created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+
+  /tickets/{id}:
+    get:
+      summary: Get a ticket by ID
+      operationId: ticketsIdGET
+      x-openapi-router-controller: DefaultController
+      x-openapi-router-service: DefaultService
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ticket retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+
+    patch:
+      summary: Update a ticket by ID
+      operationId: ticketsIdPATCH
+      x-openapi-router-controller: DefaultController
+      x-openapi-router-service: DefaultService
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TicketInput'
+      responses:
+        '200':
+          description: Ticket updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+
+    delete:
+      summary: Delete a ticket by ID
+      operationId: ticketsIdDELETE
+      x-openapi-router-controller: DefaultController
+      x-openapi-router-service: DefaultService
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Ticket deleted
+
+components:
+  schemas:
+    TicketInput:
+      type: object
+      properties:
+        event_id:
+          type: integer
+        user_id:
+          type: integer
+        seat_number:
+          type: string
+        status:
+          type: string
+          enum: [booked, canceled]
+        price:
+          type: number
+      required:
+        - event_id
+        - user_id
+        - seat_number
+        - status
+        - price
+
+    Ticket:
+      allOf:
+        - $ref: '#/components/schemas/TicketInput'
+        - type: object
+          properties:
+            id:
+              type: integer
