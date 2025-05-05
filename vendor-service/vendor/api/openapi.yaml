@@ -1,0 +1,209 @@
+openapi: 3.0.0
+info:
+  description: "The application is divided into microservice, for each microservice\
+    \ there is a RESTful API created, this is the vendor service API"
+  title: Vendor service  API
+  version: 1.0.0
+servers:
+- url: http://localhost:8080/v1
+paths:
+  /vendor:
+    post:
+      operationId: vendorPOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/_vendor_post_request'
+        required: true
+      responses:
+        "201":
+          description: Vendor registered successfully
+        "500":
+          description: Vendor registration failed
+      summary: Create a new vendor
+      x-eov-operation-handler: controllers/DefaultController
+  /vendor/{id}:
+    delete:
+      operationId: vendorIdDELETE
+      parameters:
+      - description: Deletes a vendor from the system using vendor id
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "204":
+          description: Vendor deleted successfully
+        "404":
+          description: Vendor not found
+      summary: Delete a vendor by vendor id
+      x-eov-operation-handler: controllers/DefaultController
+    get:
+      operationId: vendorIdGET
+      parameters:
+      - description: ID of the vendor to update
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          description: Reservation gotten successfully
+        "404":
+          description: Reservation not found
+        "500":
+          description: Internal server error
+      summary: Get vendor's info
+      x-eov-operation-handler: controllers/DefaultController
+    patch:
+      operationId: vendorIdPATCH
+      parameters:
+      - description: ID of the vendor to update
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/_vendor__id__patch_request'
+        required: true
+      responses:
+        "200":
+          description: Reservation updated successfully
+        "404":
+          description: Reservation not found
+        "500":
+          description: Internal server error
+      summary: Update vendor's info
+      x-eov-operation-handler: controllers/DefaultController
+components:
+  schemas:
+    Event:
+      example:
+        date: 2000-01-23T04:56:07.000+00:00
+        artist: Helena Hauff
+        price: 500
+        description: "Expect pulsating beats, minimal lighting, and a stripped-back\
+          \ industrial setting that will transport you straight to the roots of Berlin’\
+          s legendary rave culture."
+        location: Cairo
+        id: 1000
+        type: Concert
+        capacity: 200
+      properties:
+        id:
+          example: 1000
+          type: integer
+        type:
+          example: Concert
+          type: string
+        artist:
+          example: Helena Hauff
+          type: string
+        description:
+          example: "Expect pulsating beats, minimal lighting, and a stripped-back\
+            \ industrial setting that will transport you straight to the roots of\
+            \ Berlin’s legendary rave culture."
+          type: string
+        date:
+          format: date-time
+          type: string
+        location:
+          example: Cairo
+          type: string
+        capacity:
+          example: 200
+          type: integer
+        price:
+          example: 500
+          type: integer
+      type: object
+    _vendor_post_request:
+      properties:
+        name:
+          description: Name of the performer
+          type: string
+        genre:
+          description: Genre of the performer
+          type: string
+        biography:
+          description: Info about the performer
+          type: string
+        profile_picture:
+          description: profile picture for the performer
+          type: string
+      required:
+      - biography
+      - genre
+      - name
+      
+      type: object
+    _vendor__id__patch_request:
+      properties:
+        name:
+          description: Name of the performer
+          type: string
+        genre:
+          description: Genre of the performer
+          type: string
+        biography:
+          description: Info about the performer
+          type: string
+        profile_picture:
+          description: profile picture for the performer
+          type: string
+      type: object
+    _vendor_events__post_request:
+      properties:
+        vendor_id:
+          description: Id of the vendor
+          type: integer
+        event_id:
+          description: Id of the event
+          type: integer
+      type: object
+    _vendor_events__id__get_200_response:
+      example:
+        vendor_id: 123
+        events:
+        - date: 2000-01-23T04:56:07.000+00:00
+          artist: Helena Hauff
+          price: 500
+          description: "Expect pulsating beats, minimal lighting, and a stripped-back\
+            \ industrial setting that will transport you straight to the roots of\
+            \ Berlin’s legendary rave culture."
+          location: Cairo
+          id: 1000
+          type: Concert
+          capacity: 200
+        - date: 2000-01-23T04:56:07.000+00:00
+          artist: Helena Hauff
+          price: 500
+          description: "Expect pulsating beats, minimal lighting, and a stripped-back\
+            \ industrial setting that will transport you straight to the roots of\
+            \ Berlin’s legendary rave culture."
+          location: Cairo
+          id: 1000
+          type: Concert
+          capacity: 200
+      properties:
+        vendor_id:
+          example: 123
+          type: integer
+        events:
+          items:
+            $ref: '#/components/schemas/Event'
+          type: array
+      type: object
