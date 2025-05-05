@@ -1,24 +1,27 @@
 const config = require('./config');
 const logger = require('./logger');
 const ExpressServer = require('./expressServer');
-const express = require("express")
-const app = express()
-const db = require("./models");
-db.sequelize.authenticate()
-  .then(() => {
-    logger.info('✅ PostgreSQL Connection has been established successfully.');
-  })
-  .catch(err => {
-    logger.error('❌ Unable to connect to the PostgreSQL database:', err);
-  });
+const {sequelize} = require('./models');
+const express = require('express');
+const app = express() 
+const ticketRouter = require("./router/ticketRouter")
+
+
+app.use(express.json());
+
+app.use('/ticket', ticketRouter)
+
 const launchServer = async () => {
   try {
+    await sequelize.sync({ alter: true });
+    console.log("ticket table created");
     this.expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML);
     this.expressServer.launch();
     logger.info('Express server running');
   } catch (error) {
     logger.error('Express Server failure', error.message);
     await this.close();
-  } 
+  }
 };
+
 launchServer().catch(e => logger.error(e));

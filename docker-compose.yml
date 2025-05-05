@@ -29,6 +29,7 @@ services:
       - organizer-db
       - events-db
       - redis
+      - ticket-service  # Added ticket-service dependency here
 
   redis:
     image: redis:7
@@ -173,7 +174,6 @@ services:
     environment:
     - REDIRECT_URI=http://localhost/auth/google/callback
     - NODE_ENV=development
-    
     depends_on:
       - auth-db
 
@@ -186,6 +186,30 @@ services:
     volumes:
       - auth_pgdata:/var/lib/postgresql/data
   
+  ticket-service:  
+    build:
+      context: ./ticket-service
+      dockerfile: Dockerfile 
+    ports:
+      - "8087:8080"  
+    environment:
+      DB_HOST: ticket-db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: tickets
+    depends_on:
+      - ticket-db
+
+  ticket-db: 
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tickets
+    volumes:
+      - ticket_pgdata:/var/lib/postgresql/data
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
     restart: unless-stopped
@@ -206,4 +230,3 @@ volumes:
   events_pgdata:
   payment_pgdata:
   auth_pgdata:
-  elasticsearch-data:
