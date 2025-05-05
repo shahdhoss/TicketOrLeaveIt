@@ -185,6 +185,18 @@ services:
       POSTGRES_DB: tickets
     volumes:
       - auth_pgdata:/var/lib/postgresql/data
+  
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false 
+      - xpack.security.transport.ssl.enabled=false 
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
 
 volumes:
   users_pgdata:
@@ -194,3 +206,4 @@ volumes:
   events_pgdata:
   payment_pgdata:
   auth_pgdata:
+  elasticsearch-data:

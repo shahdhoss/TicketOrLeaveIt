@@ -3,7 +3,13 @@ const {events} = require('../models');
 const Service = require('./Service');
 const vendorClient = require("../grpcClient");
 const withBreaker = require("../circuit-breaker/breaker")
-const redisclient = require("../redisClient")
+// const redisclient = require("../redisClient")
+const { Client } = require('@elastic/elasticsearch');
+const es_client = new Client({
+  node: "http://localhost:9200",
+  apiVersion: '8.x'
+});
+
 /**
 * Delete an event by id
 *
@@ -38,21 +44,22 @@ const eventsIdDELETE = ( id ) => new Promise(
 const eventsIdGET = ( id ) => new Promise(
   async (resolve, reject) => {
     try {
+      console.log("woooo")
       const eventId = id.id
-      const cacheKey = `event:${eventId}`
-      const cachedEvent = await redisclient.get(cacheKey);
-      if (cachedEvent) {
-        return resolve(Service.successResponse({
-          event: JSON.parse(cachedEvent),
-        }));
-      }
+      // const cacheKey = `event:${eventId}`
+      // const cachedEvent = await redisclient.get(cacheKey);
+      // if (cachedEvent) {
+      //   return resolve(Service.successResponse({
+      //     event: JSON.parse(cachedEvent),
+      //   }));
+      // }
       const event = await events.findOne({where:{id:eventId}})
       if(!event){
         reject(Service.rejectResponse("event not found", 404))
       }
       const { organizer_id, vendorId, type, facility, address, description, date, city, capacity, ticket_types } = event
       const eventData = { organizer_id, vendor_id: vendorId, type, facility, address, description, date, city, capacity, ticket_types }
-      await redisclient.set(cacheKey, JSON.stringify(eventData), {EX: 600 });
+      // await redisclient.set(cacheKey, JSON.stringify(eventData), {EX: 600 });
       resolve(Service.successResponse({
         event: eventData,
       }));
@@ -101,9 +108,8 @@ const eventsIdPATCH = (id) => new Promise(
 const eventsPOST = (event) => new Promise(
   async (resolve, reject) => {
     try {
-      console.log(event.body)
+      console.log("so we do get to here")
       const { organizer_id, vendor_name, type, facility, address, description, date, city, capacity, ticket_types} = event.body;
-      console.log("vendor_name: ", vendor_name)
       const vendorId = await new Promise((resolve, reject) => {
         vendorClient.GetVendorByName({name: vendor_name} , (err, vendorRes) => {
           if (err) {
@@ -120,9 +126,28 @@ const eventsPOST = (event) => new Promise(
       if (!eventCreated) {
         return reject(Service.rejectResponse("Event creation failed", 505));
       }
-      resolve(Service.successResponse({
-        event: eventData,
-      }));
+      try{
+        await es_client.index({
+          index:"events",
+          id: eventCreated.id,
+          body :{
+            type: eventCreated.type,
+            description: eventCreated.description,
+            date: eventCreated.date,
+            city: eventCreated.city,
+            vendor: vendor_name,
+          }
+        })
+        resolve(Service.successResponse({
+          event: eventData,
+        }));
+      } catch(e){
+        console.log(e)
+        reject(Service.rejectResponse(
+          e.message || 'Invalid input',
+          e.status || 405,
+        ));
+      }
     } catch (e) {
       console.log(e)
       reject(Service.rejectResponse(
@@ -132,6 +157,80 @@ const eventsPOST = (event) => new Promise(
     }
   },
 );
+
+const eventsSearch = (query) => new Promise(
+  async (resolve, reject) => {
+  try {
+    console.log("here is the query: ", query);
+    if (!query) {
+      return reject(Service.rejectResponse("Query cannot be null or undefined", 400));
+    }
+    const { vendor, type, city, date } = query;
+    if (!vendor && !type && !city && !date) {
+      return reject(Service.rejectResponse("At least one search parameter is required", 400));
+    }
+    let should = []
+    if(vendor){
+      should.push({
+        multi_match:{
+          query: vendor,
+          fields :["vendor", "description"]
+        }
+      })
+    }
+    if(type){
+      should.push({
+        multi_match:{
+          query: type,
+          fields: ["type", "description"]
+        }
+      })
+    }
+    if(city){
+      should.push({
+        multi_match:{
+          query: city,
+          fields: ["city", "description"]
+        }
+      })
+    }
+    if(date){
+      should.push({
+        multi_match:{
+          query: date,
+          fields:["date", "description"]
+        }
+      })
+    }
+    const searchQuery = {
+      index: "events", 
+      body:{
+        query:{
+          bool:{
+            should,
+            minimum_should_match:1
+          }
+        }
+      }
+    }
+    console.log("before result")
+    let result;
+    try {
+      result = await es_client.search(searchQuery);
+    } catch (error) {
+      console.error("Elasticsearch search error:", error);
+      return reject(Service.rejectResponse("Error querying Elasticsearch", 500));
+    }
+    console.log("after result")
+    if (!result) {
+      return reject(Service.rejectResponse("Something went wrong", 500));
+    }
+
+    resolve(Service.successResponse({result: result.hits.hits.map(hit => hit._source)}));
+  } catch (e) {
+    reject(Service.rejectResponse(e.message || 'Invalid input', e.status || 405));
+  }
+});
 
 
 module.exports = {
@@ -150,5 +249,9 @@ module.exports = {
   eventsPOST:(event)=>
     withBreaker(eventsPOST)(event).catch((e) => Promise.reject(
       Service.rejectResponse(e.message || 'Invalid input', e.status || 405)
+    )),
+  eventsSearch: (query) =>
+    withBreaker(eventsSearch)(query).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || "Invalid input", e.status || 405)
     )),
 };

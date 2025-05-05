@@ -84,6 +84,35 @@ paths:
           description: Event not found
       summary: Partially update an event
       x-eov-operation-handler: controllers/DefaultController
+  /events/search:
+    get:
+      operationId: eventsSearch
+      parameters:
+        - name: vendor
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: city
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Search results
+      summary: Search events by vendor, type, city, or date
+      x-eov-operation-handler: controllers/DefaultController
 components:
   schemas:
     Event:

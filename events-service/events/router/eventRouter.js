@@ -1,4 +1,4 @@
-const {eventsPOST, eventsIdGET, eventsIdPATCH, eventsIdDELETE} = require("../services/DefaultService")
+const {eventsPOST, eventsIdGET, eventsIdPATCH, eventsIdDELETE, eventsSearch} = require("../services/DefaultService")
 const express = require("express")
 const router = express.Router()
 
@@ -31,4 +31,12 @@ router.delete("/:id", (req,res)=>{
     }
     eventsIdDELETE(id).then((response) => res.json(response)).catch((error) => res.status(error.code).json(error));
 })
+router.get("/search", (req,res)=>{
+    const query = req.query
+    if(!query){
+        return res.status(400).json({error:"Query is needed"})
+    }
+    eventsSearch(query).then((response) => res.json(response)).catch((error) => res.status(error.code).json(error));
+})
+
 module.exports = router;

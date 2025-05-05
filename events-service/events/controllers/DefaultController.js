@@ -8,6 +8,7 @@
 
 const Controller = require('./Controller');
 const service = require('../services/DefaultService');
+const { response } = require('express');
 
 const eventsIdDELETE = async (request, response) => {
   await Controller.handleRequest(request, response, service.eventsIdDELETE);
@@ -24,11 +25,14 @@ const eventsIdPATCH = async (request, response) => {
 const eventsPOST = async (request, response) => {
   await Controller.handleRequest(request, response, service.eventsPOST);
 };
-
+const eventsSearch = async(request, response)=>{
+  await Controller.handleRequest(request, response, service.eventsSearch);
+}
 
 module.exports = {
   eventsIdDELETE,
   eventsIdGET,
   eventsIdPATCH,
   eventsPOST,
+  eventsSearch
 };
