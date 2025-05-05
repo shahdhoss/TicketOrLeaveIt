@@ -8,29 +8,6 @@
 
 const Controller = require('./Controller');
 const service = require('../services/DefaultService');
-const eventsGET = async (request, response) => {
-  await Controller.handleRequest(request, response, service.eventsGET);
-};
-
-const eventsIdCapacityGET = async (request, response) => {
-  await Controller.handleRequest(request, response, service.eventsIdCapacityGET);
-};
-
-const eventsIdDELETE = async (request, response) => {
-  await Controller.handleRequest(request, response, service.eventsIdDELETE);
-};
-
-const eventsIdGET = async (request, response) => {
-  await Controller.handleRequest(request, response, service.eventsIdGET);
-};
-
-const eventsIdPATCH = async (request, response) => {
-  await Controller.handleRequest(request, response, service.eventsIdPATCH);
-};
-
-const eventsPOST = async (request, response) => {
-  await Controller.handleRequest(request, response, service.eventsPOST);
-};
 
 const organizersIdPATCH = async (request, response) => {
   await Controller.handleRequest(request, response, service.organizersIdPATCH);
@@ -49,12 +26,6 @@ const organizersIdGET = async (request, response) => {
 };
 
 module.exports = {
-  eventsGET,
-  eventsIdCapacityGET,
-  eventsIdDELETE,
-  eventsIdGET,
-  eventsIdPATCH,
-  eventsPOST,
   organizersIdPATCH,
   organizersPOST,
   organizersIdDelete,

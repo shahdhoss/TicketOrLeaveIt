@@ -3,14 +3,11 @@ info:
   title: Ticket Service API
   version: 1.0.0
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:8080/v1
 paths:
   /tickets:
     post:
-      summary: Create a new ticket
       operationId: ticketsPOST
-      x-openapi-router-controller: DefaultController
-      x-openapi-router-service: DefaultService
       requestBody:
         required: true
         content:
@@ -24,13 +21,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Ticket'
+      x-eov-operation-handler: controllers/DefaultController
 
   /tickets/{id}:
     get:
       summary: Get a ticket by ID
       operationId: ticketsIdGET
-      x-openapi-router-controller: DefaultController
-      x-openapi-router-service: DefaultService
       parameters:
         - name: id
           in: path
@@ -44,12 +40,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Ticket'
+      x-eov-operation-handler: controllers/DefaultController
 
     patch:
       summary: Update a ticket by ID
       operationId: ticketsIdPATCH
-      x-openapi-router-controller: DefaultController
-      x-openapi-router-service: DefaultService
       parameters:
         - name: id
           in: path
@@ -69,12 +64,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Ticket'
-
+      x-eov-operation-handler: controllers/DefaultController
     delete:
       summary: Delete a ticket by ID
       operationId: ticketsIdDELETE
-      x-openapi-router-controller: DefaultController
-      x-openapi-router-service: DefaultService
       parameters:
         - name: id
           in: path
@@ -84,6 +77,7 @@ paths:
       responses:
         '204':
           description: Ticket deleted
+      x-eov-operation-handler: controllers/DefaultController
 
 components:
   schemas:
@@ -98,7 +92,7 @@ components:
           type: string
         status:
           type: string
-          enum: [booked, canceled]
+          enum: [booked, canceled, pending]
         price:
           type: number
       required:

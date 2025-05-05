@@ -4,17 +4,12 @@ const ExpressServer = require('./expressServer');
 const {sequelize} = require('./models');
 const express = require('express');
 const app = express() 
-const ticketRouter = require("./router/ticketRouter")
+const ticketRouter = require("./routers/ticketRouter")
 
 
-app.use(express.json());
-
-app.use('/ticket', ticketRouter)
 
 const launchServer = async () => {
   try {
-    await sequelize.sync({ alter: true });
-    console.log("ticket table created");
     this.expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML);
     this.expressServer.launch();
     logger.info('Express server running');
@@ -23,5 +18,13 @@ const launchServer = async () => {
     await this.close();
   }
 };
+sequelize.sync({ alter: true }).then(() => {
+  console.log("Tables created");
+}).catch((error) => {
+  console.error(error);
+});
+
+app.use(express.json());
+app.use('/tickets', ticketRouter)
 
 launchServer().catch(e => logger.error(e));

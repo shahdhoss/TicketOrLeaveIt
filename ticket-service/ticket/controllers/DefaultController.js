@@ -1,52 +1,33 @@
-const db = require('../models');
+/**
+ * The DefaultController file is a very simple one, which does not need to be changed manually,
+ * unless there's a case where business logic routes the request to an entity which is not
+ * the service.
+ * The heavy lifting of the Controller item is done in Request.js - that is where request
+ * parameters are extracted and sent to the service, and where response is handled.
+ */
 
-const ticketsPOST = async ({ newTicket }) => {
-  const { userId, eventId, seatNumber } = newTicket;
+const Controller = require('./Controller');
+const service = require('../services/DefaultService');
 
-  
-  const user = await db.User.findByPk(userId);
-  if (!user) {
-    throw { code: 404, error: 'User not found' };
-  }
-
-  
-  const event = await db.Event.findByPk(eventId);
-  if (!event) {
-    throw { code: 404, error: 'Event not found' };
-  }
-
- 
-
-  const ticket = await db.Ticket.create({ userId, eventId, seatNumber });
-  return { code: 201, payload: ticket };
+const ticketsPOST = async (request, response) => {
+  await Controller.handleRequest(request, response, service.ticketsPOST);
 };
 
-const ticketsIdGET = async ({ ticketId }) => {
-  const ticket = await db.Ticket.findByPk(ticketId);
-  if (!ticket) {
-    throw { code: 404, error: 'Ticket not found' };
-  }
-  return ticket;
+const ticketsIdDELETE = async (request, response) => {
+  await Controller.handleRequest(request, response, service.ticketsIdDELETE);
 };
 
-const ticketsIdDELETE = async ({ ticketId }) => {
-  const ticket = await db.Ticket.findByPk(ticketId);
-  if (!ticket) {
-    throw { code: 404, error: 'Ticket not found' };
-  }
-
-  await ticket.destroy(); 
-  return { message: 'Ticket cancelled successfully' };
+const ticketsIdGET = async (request, response) => {
+  await Controller.handleRequest(request, response, service.ticketsIdGET);
 };
 
-const usersUserIdTicketsGET = async ({ userId }) => {
-  const tickets = await db.Ticket.findAll({ where: { userId } });
-  return tickets;
+const ticketsIdPATCH = async (request, response) => {
+  await Controller.handleRequest(request, response, service.ticketsIdPATCH);
 };
 
 module.exports = {
-  ticketsPOST,
-  ticketsIdGET,
   ticketsIdDELETE,
-  usersUserIdTicketsGET,
+  ticketsIdGET,
+  ticketsIdPATCH,
+  ticketsPOST
 };

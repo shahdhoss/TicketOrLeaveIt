@@ -230,3 +230,5 @@ volumes:
   events_pgdata:
   payment_pgdata:
   auth_pgdata:
+  ticket_pgdata:  
+  elasticsearch-data:
