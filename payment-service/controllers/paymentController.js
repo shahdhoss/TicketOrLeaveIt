@@ -58,3 +58,36 @@ exports.initiatePayment = async (req, res) => {
     });
   }
 };
+exports.refundPayment = async (req, res) => {
+  const { id } = req.params;
+
+  console.log(`\n🔁 Initiating refund for payment ID: ${id}`);
+
+  try {
+    const payment = await Payment.findByPk(id);
+
+    if (!payment) {
+      console.error(`❌ Payment not found with ID: ${id}`);
+      return res.status(404).json({
+        success: false,
+        message: 'Payment not found',
+      });
+    }
+
+    payment.isVerified = 'refunded';
+    await payment.save();
+
+    console.log(`✅ Payment ID ${id} marked as refunded.`);
+    res.json({
+      success: true,
+      message: `Payment ID ${id} refunded successfully`,
+    });
+
+  } catch (error) {
+    console.error(`❌ Refund Error for Payment ID ${id}:`, error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
