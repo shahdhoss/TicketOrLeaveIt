@@ -28,11 +28,14 @@ const eventsPOST = async (request, response) => {
 const eventsSearch = async(request, response)=>{
   await Controller.handleRequest(request, response, service.eventsSearch);
 }
-
+const eventsReserve = async (request, response)=>{
+  await Controller.handleRequest(request, response, service.eventsReserve)
+}
 module.exports = {
   eventsIdDELETE,
   eventsIdGET,
   eventsIdPATCH,
   eventsPOST,
-  eventsSearch
+  eventsSearch,
+  eventsReserve
 };

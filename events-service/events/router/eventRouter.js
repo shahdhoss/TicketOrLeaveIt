@@ -1,4 +1,4 @@
-const {eventsPOST, eventsIdGET, eventsIdPATCH, eventsIdDELETE, eventsSearch} = require("../services/DefaultService")
+const {eventsPOST, eventsIdGET, eventsIdPATCH, eventsIdDELETE, eventsSearch, eventsReserve} = require("../services/DefaultService")
 const express = require("express")
 const router = express.Router()
 
@@ -37,6 +37,14 @@ router.get("/search", (req,res)=>{
         return res.status(400).json({error:"Query is needed"})
     }
     eventsSearch(query).then((response) => res.json(response)).catch((error) => res.status(error.code).json(error));
+})
+
+router.post("/reserve", (req,res)=>{
+    const reservation = req.body
+    if(!reservation){
+        return res.status(400).json({error:"Reservation info is needed"})
+    }
+    eventsReserve(reservation["body"]).then((response)=> res.json(response)).catch((error)=> res.status(error.code).json(error))
 })
 
 module.exports = router;

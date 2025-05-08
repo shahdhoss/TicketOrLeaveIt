@@ -1,7 +1,7 @@
 require('dotenv').config();
 const axios = require('axios');
 const crypto = require('crypto');
-
+const {v4: uuidv4}= require("uuid")
 class PaymobService {
   static async createPayment(amount, userId, eventId) {
     const debugLog = [];
@@ -24,7 +24,7 @@ class PaymobService {
           amount_cents: Math.round(amount * 100),
           currency: 'EGP',
           items: [],
-          merchant_order_id: `user-${userId}-event-${eventId}`
+          merchant_order_id: `user-${userId}-event-${eventId}-${uuidv4()}`
         }
       );
 

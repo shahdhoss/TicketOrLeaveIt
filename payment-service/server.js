@@ -11,7 +11,9 @@ console.log('Environment Variables:', {
 console.log('=======================\n');
 
 const app = require('./app');
+const recieveReservationRequestFromEvents = require('./messaging/recieveMessage');
 const PORT = process.env.PORT || 8081;
+recieveReservationRequestFromEvents()
 
 app.listen(PORT, () => {
   console.log(`\nServer running on port ${PORT}`);

@@ -5,8 +5,7 @@ const {sequelize} = require('./models');
 const express = require('express');
 const app = express() 
 const ticketRouter = require("./routers/ticketRouter")
-
-
+const recievingConfirmationFromPayment = require("./messaging/recieveMessages")
 
 const launchServer = async () => {
   try {
@@ -18,6 +17,7 @@ const launchServer = async () => {
     await this.close();
   }
 };
+
 sequelize.sync({ alter: true }).then(() => {
   console.log("Tables created");
 }).catch((error) => {
@@ -26,5 +26,5 @@ sequelize.sync({ alter: true }).then(() => {
 
 app.use(express.json());
 app.use('/tickets', ticketRouter)
-
+recievingConfirmationFromPayment()
 launchServer().catch(e => logger.error(e));

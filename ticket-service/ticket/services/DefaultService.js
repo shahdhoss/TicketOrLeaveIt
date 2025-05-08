@@ -1,12 +1,13 @@
 const Service = require('./Service');
 const { ticket } = require("../models");
 const withBreaker = require("../circuit-breaker/breaker");
-
+const redisClient = require("../redisClient");
 
 const ticketsPOST = (ticketReq) => new Promise(
   async (resolve, reject) => {
     try {
-      const {event_id, user_id, seat_number, price,status} = ticketReq.body;
+      const {user_id, seat_number, price, status} = ticketReq.body
+      const event_id = await redisClient.get(`reservation:${user_id}`)
       const ticketData = {event_id, user_id, seat_number, price, status}
       const newTicket = await ticket.create(ticketData)
       if (!newTicket){

@@ -113,6 +113,33 @@ paths:
           description: Search results
       summary: Search events by vendor, type, city, or date
       x-eov-operation-handler: controllers/DefaultController
+  
+  /events/reserve:
+    post:
+      summary: Reserve an event
+      operationId: eventsReserve
+      x-eov-operation-handler: controllers/DefaultController
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  example: 123
+                event_id:
+                  type: integer
+                  example: 456
+              required:
+                - user_id
+                - event_id
+      responses:
+        "201":
+          description: Event reserved successfully
+
+
 components:
   schemas:
     Event:
@@ -235,3 +262,4 @@ components:
           format: float
           type: number
       type: object
+
