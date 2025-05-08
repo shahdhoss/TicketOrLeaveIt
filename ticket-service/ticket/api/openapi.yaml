@@ -79,6 +79,22 @@ paths:
           description: Ticket deleted
       x-eov-operation-handler: controllers/DefaultController
 
+  /tickets/health:
+    get:
+      summary: checks health 
+      operationId: ticketsHealth
+      x-eov-operation-handler: controllers/DefaultController
+      responses:
+        "200":
+          description: Tickets service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
 components:
   schemas:
     TicketInput:

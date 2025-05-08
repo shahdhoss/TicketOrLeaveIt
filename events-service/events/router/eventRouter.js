@@ -1,3 +1,5 @@
+const { response } = require("../../../payment-service/app")
+const { eventsHealth } = require("../controllers/DefaultController")
 const {eventsPOST, eventsIdGET, eventsIdPATCH, eventsIdDELETE, eventsSearch, eventsReserve} = require("../services/DefaultService")
 const express = require("express")
 const router = express.Router()
@@ -45,6 +47,10 @@ router.post("/reserve", (req,res)=>{
         return res.status(400).json({error:"Reservation info is needed"})
     }
     eventsReserve(reservation["body"]).then((response)=> res.json(response)).catch((error)=> res.status(error.code).json(error))
+})
+
+router.get("/health", (req,res)=>{
+    eventsHealth().then((response)=>res.json(response)).catch((error)=> res.status(error.code).json(error))
 })
 
 module.exports = router;

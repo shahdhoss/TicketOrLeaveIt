@@ -1,8 +1,10 @@
+const { response } = require('../../../payment-service/app');
 const {
    ticketsPOST,
    ticketsIdGET,
    ticketsIdPATCH,
-   ticketsIdDELETE
+   ticketsIdDELETE,
+   ticketsHealth
 } = require('../services/DefaultService');
 
 const express = require('express');
@@ -50,5 +52,9 @@ router.delete('/:id', (req, res) => {
        .then((response) => res.json(response))
        .catch((error) => res.status(error.code || 500).json(error));
 });
+
+router.get("/health" , (req,res)=>{
+    ticketsHealth.then((response)=> res.json(response)).catch((error)=> res.status(404).json(error))
+})
 
 module.exports = router;

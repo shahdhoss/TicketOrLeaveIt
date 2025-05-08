@@ -50,3 +50,6 @@
 {"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T18:49:09.534Z"}
 {"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T18:52:30.205Z"}
 {"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T18:55:30.852Z"}
+{"level":"error","message":"failed to start Express Server","service":"tickets-service","timestamp":"2025-05-08T20:58:27.013Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T20:58:27.049Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T20:59:21.707Z"}

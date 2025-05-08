@@ -6,3 +6,4 @@
 {"level":"error","service":"tickets-service","timestamp":"2025-05-05T15:49:45.041Z"}
 {"level":"error","message":"Express Server failure","service":"tickets-service","timestamp":"2025-05-05T15:51:23.715Z"}
 {"level":"error","service":"tickets-service","timestamp":"2025-05-05T15:51:23.721Z"}
+{"level":"error","message":"failed to start Express Server","service":"tickets-service","timestamp":"2025-05-08T20:58:27.013Z"}

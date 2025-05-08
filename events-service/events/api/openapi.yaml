@@ -138,6 +138,24 @@ paths:
       responses:
         "201":
           description: Event reserved successfully
+  
+  /events/health:
+    get:
+      summary: checks health 
+      operationId: eventsHealth
+      x-eov-operation-handler: controllers/DefaultController
+      responses:
+        "200":
+          description: Events service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
 
 
 components:

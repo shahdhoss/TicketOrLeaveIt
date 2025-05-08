@@ -236,20 +236,30 @@ const eventsSearch = (query) => new Promise(
 const eventsReserve = (reservation) => new Promise(
   async (resolve, reject)=>{
     try{
-      const payment_queue= "event-payment-reservation"
-      const {user_id,event_id} = reservation.body
+      const tickets_queue = "tickets"
+      const {user_id, event_id} = reservation.body
       const resObject = {user_id, event_id}
       const newReservation = await reservations.create(resObject)
       if(!newReservation){
         reject(Service.rejectResponse("Reservation isn't successful", 400))
       }
-      if (isHealthy(payment_queue)){
+      if (isHealthy(tickets_queue)){
         sendReservationToTickets(resObject)
         resolve(Service.successResponse({reservation: resObject}))
       }
       reject(Service.rejectResponse("Payment queue is not healthy", 400))
     }catch(e){
       console.log(e)
+      reject(Service.rejectResponse(e, e.status || 405))
+    }
+  }
+)
+
+const eventsHealth = () => new Promise(
+  async(resolve,reject)=>{
+    try{
+      resolve(Service.successResponse({status:"ok"}))
+    }catch(e){
       reject(Service.rejectResponse(e, e.status || 405))
     }
   }
@@ -280,4 +290,5 @@ module.exports = {
     withBreaker(eventsReserve)(reservation).catch((e) => Promise.reject(
       Service.rejectResponse(e.message || "Invalid input", e.status || 405)
     )),
+  eventsHealth
 };

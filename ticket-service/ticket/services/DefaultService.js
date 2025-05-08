@@ -91,6 +91,18 @@ const ticketsIdDELETE = (id) => new Promise(
     }
   }
 );
+const ticketsHealth = () => new Promise(
+  async(resolve, reject)=>{
+    try{
+      resolve(Service.successResponse({ status: "ok"}));
+    }catch(e){
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405
+      ));
+    }
+  }
+)
 
 module.exports = {
   ticketsPOST: (ticket) =>
@@ -109,4 +121,5 @@ module.exports = {
     withBreaker(ticketsIdDELETE)(id).catch((e) =>
       Promise.reject(Service.rejectResponse(e.message || "Invalid input", e.status || 405))
     ),
+  ticketsHealth
 };

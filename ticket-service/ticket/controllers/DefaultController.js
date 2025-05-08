@@ -8,6 +8,7 @@
 
 const Controller = require('./Controller');
 const service = require('../services/DefaultService');
+const { request } = require('../../../payment-service/app');
 
 const ticketsPOST = async (request, response) => {
   await Controller.handleRequest(request, response, service.ticketsPOST);
@@ -24,10 +25,13 @@ const ticketsIdGET = async (request, response) => {
 const ticketsIdPATCH = async (request, response) => {
   await Controller.handleRequest(request, response, service.ticketsIdPATCH);
 };
-
+const ticketsHealth = async (request, response)=>{
+  await Controller.handleRequest(request, response, service.ticketsHealth)
+}
 module.exports = {
   ticketsIdDELETE,
   ticketsIdGET,
   ticketsIdPATCH,
-  ticketsPOST
+  ticketsPOST,
+  ticketsHealth
 };
