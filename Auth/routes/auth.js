@@ -1,8 +1,8 @@
 const express = require('express');
 const axios = require('axios');
 const User = require('../models/User');
-const { createRefreshToken, verifyToken } = require('../utils/jwt');
-const verifyRefreshToken = require('../middleware/verifyToken');
+const { createAccessToken, createRefreshToken, verifyToken } = require('../utils/jwt');
+const verifyAccessToken = require('../middleware/verifyToken');
 const router = express.Router();
 require('dotenv').config();
 
@@ -31,11 +31,11 @@ router.get('/google/callback', async (req, res) => {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
 
-    const accessToken = tokenResponse.data.access_token;
+    const accessTokenGoogle = tokenResponse.data.access_token;
 
     const userResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
       headers: {
-        Authorization: `Bearer ${accessToken}`
+        Authorization: `Bearer ${accessTokenGoogle}`
       }
     });
 
@@ -52,22 +52,22 @@ router.get('/google/callback', async (req, res) => {
       });
     }
 
-    const refreshToken = createRefreshToken({
+    const payload = {
       user_id: user.id,
       email: user.email,
       name: user.name,
       role: user.role,
       sub: user.google_sub
-    });
+    };
 
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'Lax',
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
-    });
+    const access_token = createAccessToken(payload);
+    const refresh_token = createRefreshToken(payload);
 
-    res.json({ message: 'Logged in' });
+    res.json({
+      message: 'Logged in',
+      access_token,
+      refresh_token
+    });
 
   } catch (err) {
     console.error('Google OAuth error:', err.response?.data || err.message);
@@ -75,17 +75,30 @@ router.get('/google/callback', async (req, res) => {
   }
 });
 
-router.get('/me', verifyRefreshToken, (req, res) => {
+// user info
+router.get('/me', verifyAccessToken, (req, res) => {
   res.json({ user: req.user });
 });
 
+// Refresh access token
+router.post('/token', (req, res) => {
+  const refresh_token = req.body.refresh_token || req.query.token;
+
+  if (!refresh_token) {
+    return res.status(401).json({ error: 'Missing refresh token' });
+  }
+
+  const payload = verifyToken(refresh_token);
+  if (!payload) {
+    return res.status(403).json({ error: 'Invalid or expired refresh token' });
+  }
+
+  const access_token = createAccessToken(payload);
+  res.json({ access_token });
+});
+
 router.post('/logout', (req, res) => {
-  res.clearCookie('refresh_token', {
-    httpOnly: true,
-    secure: false,
-    sameSite: 'Lax'
-  });
-  res.json({ message: 'Logged out' });
+  res.json({ message: 'Logged out (client should delete tokens)' });
 });
 
 module.exports = router;
