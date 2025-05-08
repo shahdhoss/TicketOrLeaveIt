@@ -22,8 +22,8 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
       },
       isVerified: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true, 
+        type: DataTypes.STRING,
+        defaultValue: 'true', 
       },
       createdAt: {
         type: DataTypes.DATE,
