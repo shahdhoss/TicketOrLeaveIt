@@ -1,9 +1,9 @@
 const amqp = require("amqplib")
 const redisClient = require("../redisClient")
 
-async function recievingConfirmationFromPayment(){
-    const exchange = "confirmTicket"
-    const bindingKey = "payment->tickets"
+async function recievingReservationFromEvents(){
+    const exchange = "reserveTicket"
+    const bindingKey = "events->tickets"
     const con = await amqp.connect("amqp://localhost")
     const channel = await con.createChannel()
     await channel.assertExchange(exchange, "direct", {durable: true})
@@ -18,4 +18,4 @@ async function recievingConfirmationFromPayment(){
     })
 }
 
-module.exports = recievingConfirmationFromPayment 
+module.exports = recievingReservationFromEvents 

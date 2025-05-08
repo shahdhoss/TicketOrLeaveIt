@@ -2,6 +2,7 @@ const Service = require('./Service');
 const { ticket } = require("../models");
 const withBreaker = require("../circuit-breaker/breaker");
 const redisClient = require("../redisClient");
+const sendReservationToPayments = require("../messaging/sendMessages")
 
 const ticketsPOST = (ticketReq) => new Promise(
   async (resolve, reject) => {
@@ -13,6 +14,8 @@ const ticketsPOST = (ticketReq) => new Promise(
       if (!newTicket){
         reject(Service.rejectResponse("Ticket haven't been created in db", 400))
       }
+      const message = {user_id: user_id, event_id: event_id}
+      sendReservationToPayments(message)
       resolve(Service.successResponse({ new_ticket: newTicket }));
     } catch (e) {
       console.log(e)

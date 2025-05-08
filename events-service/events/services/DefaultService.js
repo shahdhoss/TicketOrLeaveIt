@@ -9,7 +9,7 @@ const es_client = new Client({
   node: "http://localhost:9200",
   apiVersion: '8.x'
 });
-const sendReservationToTickets= require("../messaging/sendMessage")
+const sendReservationToTickets = require("../messaging/sendMessage")
 const isHealthy = require("../messaging/checkHealth")
 /**
 * Delete an event by id
