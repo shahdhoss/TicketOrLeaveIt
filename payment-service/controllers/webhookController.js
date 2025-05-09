@@ -6,7 +6,7 @@ exports.handleWebhook = async (req, res) => {
   if (obj.success === true) {
     try {
       await Payment.update(
-        { isVerified: true },
+        { isVerified: "true" },
         { where: { paymobOrderId: obj.order.id } }
       );
       res.status(200).send('Webhook processed');
