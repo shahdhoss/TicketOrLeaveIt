@@ -29,7 +29,8 @@ services:
       - organizer-db
       - events-db
       - redis
-      - ticket-service  # Added ticket-service dependency here
+      - ticket-service
+      - notification-service
 
   redis:
     image: redis:7
@@ -232,6 +233,22 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
 
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: dockerfile
+    ports:
+      - "8088:8083"
+    environment:
+      RABBITMQ_URL: amqp://rabbitmq
+      REDIS_URL: redis://redis:6379
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+    depends_on:
+      - rabbitmq
+      - redis
 
 volumes:
   users_pgdata:
