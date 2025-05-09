@@ -9,8 +9,10 @@ async function isHealthy(queue_name) {
                 password:"guest"
             }
         })
+        console.log(`Queue health response for ${queue_name}:`, res.data)
         return res.data.consumers > 0
     }catch(error){
+        console.log("inside the rror ")
         console.log(error.message)
         return false
     }

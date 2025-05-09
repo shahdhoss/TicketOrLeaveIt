@@ -1,4 +1,5 @@
 require('dotenv').config();
+const recieveReservationRequestFromTickets = require('./messaging/recieveMessage');
 
 console.log('\n=== ENVIRONMENT DEBUG ===');
 console.log('Current Directory:', process.cwd());
@@ -11,7 +12,6 @@ console.log('Environment Variables:', {
 console.log('=======================\n');
 
 const app = require('./app');
-const recieveReservationRequestFromTickets = require('./messaging/recieveMessage');
 const PORT = process.env.PORT || 8081;
 recieveReservationRequestFromTickets()
 

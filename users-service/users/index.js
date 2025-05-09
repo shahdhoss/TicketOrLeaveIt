@@ -2,9 +2,7 @@ const config = require('./config');
 const logger = require('./logger');
 const ExpressServer = require('./expressServer');
 const {sequelize} = require('./models');
-const express = require('express');
-const app = express() 
-const userRouter = require("./routers/userRouter")
+const app = require("./app")
 
 const launchServer = async () => {
   try {
@@ -22,8 +20,5 @@ sequelize.sync({alter:true}).then(() => {
 }).catch((error) => {
   console.error(error);
 })
-
-app.use(express.json());
-app.use('/users', userRouter)
 
 launchServer().catch(e => logger.error(e));

@@ -45,6 +45,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8085:8081"
+    expose:
+      - "8081"  
     environment:
       DB_HOST: payment-db
       DB_PORT: 5432
@@ -66,7 +68,31 @@ services:
       POSTGRES_DB: payment-db
     volumes:
       - payment_pgdata:/var/lib/postgresql/data
+  prometheus:
+    image: prom/prometheus
+    
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    depends_on:
+      - payment-service
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
 
+  node-exporter:
+    image: prom/node-exporter
+    network_mode: host
+    ports:
+      - "9100:9100"    
   user-service:
     build:
       context: ./users-service
@@ -232,6 +258,17 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+  
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok
+    environment:
+      - NGROK_AUTHTOKEN=2iW06s8O85TusaFTnxH41qtviL6_84FHxknm1C38qDbU8jG27
+      - NGROK_REGION=eu
+    ports:
+      - "4040:4040"
+      - "8080:8080"
+    command: ["http", "8080", "--log=stdout"]
 
   notification-service:
     build:
@@ -260,3 +297,4 @@ volumes:
   auth_pgdata:
   ticket_pgdata:  
   elasticsearch-data:
+  grafana_data:

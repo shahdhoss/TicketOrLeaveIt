@@ -65,8 +65,10 @@ const usersIdGET = ( id ) => new Promise(
 const usersIdPATCH = ( id ) => new Promise(
   async (resolve, reject) => {
     try {
+      console.log(id)
       const userId = id.id
-      const userData = id.body.users
+      const userData = id.body
+      console.log(userData)
       const update = await users.update(userData, {where:{id:userId}})
       if(update[0]!=1){
         reject(Service.rejectResponse("user not found","404"))
@@ -75,6 +77,7 @@ const usersIdPATCH = ( id ) => new Promise(
         user:userData,
       }));
     } catch (e) {
+      console.log(e)
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -91,7 +94,7 @@ const usersIdPATCH = ( id ) => new Promise(
 const usersPOST = ( user ) => new Promise(
   async (resolve, reject) => {
     try {
-      const {first_name, last_name, email,password} = user.body.users
+      const {first_name, last_name, email,password} = user.body
       const userData = {first_name, last_name, email,password}
       const userCreated = await users.create(userData)
       resolve(Service.successResponse({
@@ -108,6 +111,7 @@ const usersPOST = ( user ) => new Promise(
 
 
 module.exports = {
+  usersPOST,
   usersIdDELETE:(id)=>
     withBreaker(usersIdDELETE)(id).catch((e)=> Promise.reject(
       Service.rejectResponse(e.message || "Invalid input", e.status|| 405)
