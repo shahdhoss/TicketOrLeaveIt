@@ -13,7 +13,7 @@ async function recievingReservationFromEvents(){
     console.log("recieving up and running")
     channel.consume(q.queue, async (message)=>{
         const data = JSON.parse(message.content.toString())
-        await redisClient.set(`reservation:${data.user_id}`, String(data.event_id), {EX:600})
+        await redisClient.set(`reservation:${data.reservation_id}`, JSON.stringify({user_id: data.user_id, event_id:data.event_id}) , {EX:600})
         console.log("proof of work: ", data)
         channel.ack(message)
     })
@@ -40,7 +40,7 @@ async function updateTicketStatus(message) {
     try {
       const [updatedRows] = await ticket.update(
         { status: message.message },
-        { where: { user_id: message.user_id } }
+        { where: { id: message.ticket_id } }
       );
       if (updatedRows === 0) {
         console.warn('No ticket found for given user id.');

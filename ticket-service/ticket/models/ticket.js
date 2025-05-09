@@ -1,9 +1,8 @@
 module.exports = (sequelize, DataTypes) => {
     const ticket = sequelize.define("ticket", {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             primaryKey: true,
-            autoIncrement: true
         },
         event_id: {
             type: DataTypes.INTEGER,

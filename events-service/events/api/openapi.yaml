@@ -139,6 +139,31 @@ paths:
         "201":
           description: Event reserved successfully
   
+  /events/cancel:
+    post:
+      summary: Cancel a reservation
+      operationId: eventsCancel
+      x-eov-operation-handler: controllers/DefaultController
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  example: 123
+                event_id:
+                  type: integer
+                  example: 456
+              required:
+                - user_id
+                - event_id
+      responses:
+        "201":
+          description: Event reservation canceled successfully
+  
   /events/health:
     get:
       summary: checks health 

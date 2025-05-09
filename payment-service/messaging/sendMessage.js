@@ -11,7 +11,7 @@ async function updateTicketReservation(message){
     setTimeout(()=> con.close(), 5000)
 }
 
-async function updateEventCapacity(message){
+async function updateEventCapacityandReservationStatus(message){
     const exchange = "eventCapacity"
     const routingKey = "payment->events"
     const con = await amqp.connect("amqp://localhost")
@@ -22,4 +22,4 @@ async function updateEventCapacity(message){
     setTimeout(()=> con.close(), 5000)
 }
 
-module.exports = {updateTicketReservation, updateEventCapacity}
+module.exports = {updateTicketReservation, updateEventCapacityandReservationStatus}
