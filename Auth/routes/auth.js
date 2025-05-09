@@ -98,6 +98,7 @@ router.post('/token', (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
+
   res.json({ message: 'Logged out (client should delete tokens)' });
 });
 
