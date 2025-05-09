@@ -53,3 +53,14 @@
 {"level":"error","message":"failed to start Express Server","service":"tickets-service","timestamp":"2025-05-08T20:58:27.013Z"}
 {"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T20:58:27.049Z"}
 {"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T20:59:21.707Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T20:59:55.051Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T21:18:43.990Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T21:27:32.850Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T21:30:26.119Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T21:45:35.276Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T22:05:05.478Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T22:11:03.730Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T22:15:10.371Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T23:24:32.555Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-08T23:32:23.722Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-09T10:08:27.425Z"}

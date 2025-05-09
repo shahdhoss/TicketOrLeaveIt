@@ -5,7 +5,7 @@ const {sequelize} = require('./models');
 const express = require('express');
 const app = express() 
 const eventRouter = require("./router/eventRouter")
-
+const recieveMessageFromPayment = require("./messaging/receiveMessage")
 app.use(express.json());
 
 app.use('/events', eventRouter)
@@ -22,5 +22,5 @@ const launchServer = async () => {
     await this.close();
   }
 };
-
+recieveMessageFromPayment()
 launchServer().catch(e => logger.error(e));
