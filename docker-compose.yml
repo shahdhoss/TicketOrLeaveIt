@@ -29,7 +29,8 @@ services:
       - organizer-db
       - events-db
       - redis
-      - ticket-service  # Added ticket-service dependency here
+      - ticket-service
+      - notification-service
 
   redis:
     image: redis:7
@@ -44,6 +45,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8085:8081"
+    expose:
+      - "8081"  
     environment:
       DB_HOST: payment-db
       DB_PORT: 5432
@@ -65,7 +68,31 @@ services:
       POSTGRES_DB: payment-db
     volumes:
       - payment_pgdata:/var/lib/postgresql/data
+  prometheus:
+    image: prom/prometheus
+    
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    depends_on:
+      - payment-service
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
 
+  node-exporter:
+    image: prom/node-exporter
+    network_mode: host
+    ports:
+      - "9100:9100"    
   user-service:
     build:
       context: ./users-service
@@ -243,6 +270,22 @@ services:
       - "8080:8080"
     command: ["http", "8080", "--log=stdout"]
 
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: dockerfile
+    ports:
+      - "8088:8083"
+    environment:
+      RABBITMQ_URL: amqp://rabbitmq
+      REDIS_URL: redis://redis:6379
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+    depends_on:
+      - rabbitmq
+      - redis
 
 volumes:
   users_pgdata:
@@ -254,3 +297,4 @@ volumes:
   auth_pgdata:
   ticket_pgdata:  
   elasticsearch-data:
+  grafana_data:

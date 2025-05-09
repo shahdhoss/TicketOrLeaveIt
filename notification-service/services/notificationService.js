@@ -1,88 +1,73 @@
-const axios = require('axios');
-const { sendTicketEmail } = require('./emailService');
+const { sendEmail } = require('./emailService');
 const logger = require('../utils/logger');
-const redis = require('redis');
-
-const redisClient = redis.createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379'
-});
-
-redisClient.connect().catch(console.error);
-
-async function getUserEmail(userId) {
-  try {
-    const response = await axios.get(`${process.env.AUTH_SERVICE_URL}/auth/me`, {
-      headers: {
-        'Authorization': `Bearer ${userId}` 
-      }
-    });
-    return response.data.user.email;
-  } catch (error) {
-    logger.error('Error fetching user email:', error);
-    throw new Error('Failed to fetch user email');
-  }
-}
-
-async function getTicketDetails(ticketId) {
-  try {
-    const response = await axios.get(`${process.env.TICKET_SERVICE_URL}/tickets/${ticketId}`);
-    return response.data.ticketData;
-  } catch (error) {
-    logger.error('Error fetching ticket details:', error);
-    throw new Error('Failed to fetch ticket details');
-  }
-}
 
 async function handleTicketCreation(data) {
   try {
-    const { user_id, event_id } = data;
-    // Store ticket info in Redis for later use
-    await redisClient.set(`ticket:${user_id}:${event_id}`, JSON.stringify({
-      userId: user_id,
-      eventId: event_id,
-      createdAt: new Date().toISOString()
-    }), { EX: 3600 }); // Store for 1 hour
+    const { user_id, event_id, user_email, event_name, price } = data;
+    
+    if (!user_email || !event_name || !price) {
+      throw new Error('Missing required ticket data');
+    }
+
+    logger.info('Processing ticket creation notification', { user_id, event_id });
+    
+    // Send ticket creation email
+    await sendEmail({
+      to: user_email,
+      subject: 'Ticket Created Successfully',
+      text: `Your ticket for ${event_name} has been created. Amount: $${price}`,
+      html: `
+        <h1>Ticket Created Successfully</h1>
+        <p>Your ticket for ${event_name} has been created.</p>
+        <p>Amount: $${price}</p>
+        <p>Please complete the payment to confirm your ticket.</p>
+      `
+    });
+
+    logger.info('Ticket creation email sent successfully', { user_id, event_id });
   } catch (error) {
-    logger.error('Error storing ticket info:', error);
+    logger.error('Error handling ticket creation:', error);
     throw error;
   }
 }
 
 async function handlePaymentConfirmation(data) {
   try {
-    const { user_id, event_id } = data;
-    
-    // Get stored ticket info
-    const ticketInfo = await redisClient.get(`ticket:${user_id}:${event_id}`);
-    if (!ticketInfo) {
-      logger.error('No ticket info found for payment confirmation');
-      return;
+    const { 
+      user_id, 
+      event_id, 
+      user_email, 
+      event_name, 
+      price,
+      payment_id,
+      payment_method,
+      payment_date
+    } = data;
+
+    if (!user_email || !event_name || !price) {
+      throw new Error('Missing required payment data');
     }
 
-    const ticket = JSON.parse(ticketInfo);
-    
-    // Get user email from Auth service
-    const userEmail = await getUserEmail(user_id);
-    
-    // Get ticket details from Ticket service
-    const ticketDetails = await getTicketDetails(ticket.eventId);
-   
-    const emailData = {
-      ticketId: ticket.eventId,
-      eventName: ticketDetails.event_name,
-      paymentMethod: 'Paymob',
-      amount: ticketDetails.price
-    };
-    
+    logger.info('Processing payment confirmation notification', { user_id, event_id, payment_id });
 
-    await sendTicketEmail(userEmail, emailData);
-    
-  
-    await redisClient.del(`ticket:${user_id}:${event_id}`);
-    
-    logger.info(`Successfully sent ticket confirmation email to ${userEmail}`);
+    // Send payment confirmation email
+    await sendEmail({
+      to: user_email,
+      subject: 'Payment Confirmed - Ticket Ready',
+      text: `Your payment for ${event_name} has been confirmed. Amount: $${price}`,
+      html: `
+        <h1>Payment Confirmed</h1>
+        <p>Your payment for ${event_name} has been confirmed.</p>
+        <p>Amount: $${price}</p>
+        <p>Payment Method: ${payment_method}</p>
+        <p>Payment Date: ${new Date(payment_date).toLocaleString()}</p>
+        <p>Your ticket is now ready!</p>
+      `
+    });
+
+    logger.info('Payment confirmation email sent successfully', { user_id, event_id, payment_id });
   } catch (error) {
-    logger.error('Error in payment confirmation handling:', error);
+    logger.error('Error handling payment confirmation:', error);
     throw error;
   }
 }
