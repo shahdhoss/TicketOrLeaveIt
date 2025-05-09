@@ -257,6 +257,17 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+  
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok
+    environment:
+      - NGROK_AUTHTOKEN=2iW06s8O85TusaFTnxH41qtviL6_84FHxknm1C38qDbU8jG27
+      - NGROK_REGION=eu
+    ports:
+      - "4040:4040"
+      - "8080:8080"
+    command: ["http", "8080", "--log=stdout"]
 
 
 volumes:

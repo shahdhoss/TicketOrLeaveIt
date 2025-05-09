@@ -9,7 +9,7 @@ router.post('/', (req,res) =>{
     if(!users){
         return res.status(400).json({error:"User is required"})
     }
-    usersPOST(users["body"]).then((response) => res.json(response)).catch((error) => res.status(error.code).json(error));
+    usersPOST(users).then((response) => res.json(response)).catch((error) => res.status(error.code).json(error));
 })
 router.get("/:id", (req,res)=>{
     const id = req.params
