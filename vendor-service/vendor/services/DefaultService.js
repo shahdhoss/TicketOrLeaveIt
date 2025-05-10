@@ -90,13 +90,9 @@ const vendorIdPATCH = (id) => new Promise(
 const vendorPOST = (vendor) => new Promise(
   async (resolve, reject) => {
     try {
-      console.log("so we do get to here")
-      console.log(vendor.body)
       const {name,genre,biography} = vendor.body
       const vendorData= {name,genre,biography}
-      console.log(vendorData)
       const vendorCreated = await vendors.create(vendorData)
-      console.log("after creation")
       resolve(Service.successResponse({
         vendor: vendorCreated,
       }));

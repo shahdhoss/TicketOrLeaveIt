@@ -112,7 +112,6 @@ const eventsIdPATCH = (id) => new Promise(
 const eventsPOST = (event) => new Promise(
   async (resolve, reject) => {
     try {
-      console.log("so we do get to here")
       const { organizer_id, vendor_name, type, facility, address, description, date, city, capacity, ticket_types} = event.body;
       const vendorId = await new Promise((resolve, reject) => {
         vendorClient.GetVendorByName({name: vendor_name} , (err, vendorRes) => {
@@ -165,11 +164,10 @@ const eventsPOST = (event) => new Promise(
 const eventsSearch = (query) => new Promise(
   async (resolve, reject) => {
   try {
-    console.log("here is the query: ", query);
     if (!query) {
       return reject(Service.rejectResponse("Query cannot be null or undefined", 400));
     }
-    const { vendor, type, city, date } = query;
+    const { vendor, type, city, date } = query
     if (!vendor && !type && !city && !date) {
       return reject(Service.rejectResponse("At least one search parameter is required", 400));
     }
@@ -217,12 +215,10 @@ const eventsSearch = (query) => new Promise(
         }
       }
     }
-    console.log("before result")
     let result;
     try {
       result = await es_client.search(searchQuery);
     } catch (error) {
-      console.error("Elasticsearch search error:", error);
       return reject(Service.rejectResponse("Error querying Elasticsearch", 500));
     }
     console.log("after result")

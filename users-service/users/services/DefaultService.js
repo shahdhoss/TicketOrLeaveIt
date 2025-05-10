@@ -2,7 +2,6 @@
 const Service = require('./Service');
 const {users}= require("../models");
 const withBreaker = require("../circuit_breaker/breaker");
-const { use } = require('chai');
 /**
 * Delete a user by id
 *
