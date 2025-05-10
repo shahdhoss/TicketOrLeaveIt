@@ -33,8 +33,8 @@ exports.initiatePayment = async (req, res) => {
       });
     }
 
-    const eventsHealth = await axios.get("http://localhost:8082/v1/events/health")
-    const ticketsHealth = await axios.get("http://localhost:8080/v1/tickets/health")
+    const eventsHealth = await axios.get("http://localhost/v1/events/health")
+    const ticketsHealth = await axios.get("http://localhost/v1/tickets/health")
     
     if(isHealthy(ticketsQueue) && isHealthy(eventsQueue) && eventsHealth.status === 200 && ticketsHealth.status === 200){       //a bit of coupling but its better than reserving a non existent seat
       const paymentData = await PaymobService.createPayment(amount, user_id, event_id);

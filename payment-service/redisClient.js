@@ -1,7 +1,7 @@
 const redis = require('redis');
 
 const redisclient = redis.createClient({
-  url: 'redis://localhost:6379'
+  url: 'redis://redis:6379'
 });
 
 redisclient.connect();
