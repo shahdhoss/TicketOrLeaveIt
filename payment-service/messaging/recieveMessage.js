@@ -1,7 +1,5 @@
 const amqp = require("amqplib")
 const redisClient = require("../redisClient")
-const refundPayment = require("../controllers/paymentController")
-const reservations = require("../../events-service/events/models/reservations")
 
 async function recieveReservationRequestFromTickets() {
     const exchange = "confirmTicket"
