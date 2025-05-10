@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { sendEmail } = require('../services/emailService');
+const { handleTicketCreation, handlePaymentConfirmation } = require('../services/notificationService');
 const logger = require('../utils/logger');
 
 // Health check endpoint
@@ -8,26 +8,29 @@ router.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// Test email endpoint
-router.post('/test', async (req, res) => {
+// Test ticket creation notification
+router.post('/test/ticket', async (req, res) => {
   try {
-    const { to, subject, text, html } = req.body;
-    
-    if (!to || !subject || (!text && !html)) {
-      return res.status(400).json({ 
-        error: 'Missing required fields: to, subject, and either text or html' 
-      });
-    }
-
-    const result = await sendEmail({ to, subject, text, html });
-    res.status(200).json({ 
-      message: 'Test email sent successfully',
-      id: result.id
-    });
+    await handleTicketCreation();
+    res.status(200).json({ message: 'Test ticket notification sent successfully' });
   } catch (error) {
-    logger.error('Error in test endpoint:', error);
+    logger.error('Error in ticket test endpoint:', error);
     res.status(500).json({ 
-      error: 'Failed to send test email',
+      error: 'Failed to send test ticket notification',
+      details: error.message 
+    });
+  }
+});
+
+// Test payment confirmation notification
+router.post('/test/payment', async (req, res) => {
+  try {
+    await handlePaymentConfirmation();
+    res.status(200).json({ message: 'Test payment notification sent successfully' });
+  } catch (error) {
+    logger.error('Error in payment test endpoint:', error);
+    res.status(500).json({ 
+      error: 'Failed to send test payment notification',
       details: error.message 
     });
   }
