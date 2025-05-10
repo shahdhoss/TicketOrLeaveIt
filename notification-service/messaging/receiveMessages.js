@@ -1,6 +1,5 @@
 const amqp = require('amqplib');
 const redisClient = require("../redisClient");
-const ticket = require('../../ticket-service/ticket/models/ticket');
 
 async function recieveEventInfo() {
   const exchange = "eventInfo"
@@ -14,9 +13,11 @@ async function recieveEventInfo() {
   channel.consume(q.queue, async(message)=>{
       const data = JSON.parse(message.content.toString())
       console.log(data)
-      await redisClient.set(`event:${data.id}`,JSON.stringify({ticket_id: data.ticket_id, description: data.description, date: data.date, address: data.address}))
-      const redisValue = await redisClient.get(`event:${data.id}`);
-      console.log("Saved in Redis:", JSON.parse(redisValue));
+      // Saving full event data
+      await redisClient.set(`event:${data.id}`, JSON.stringify(data));
+      if (data.ticket_id) {
+        await redisClient.set(`ticket:${data.ticket_id}`, JSON.stringify(data));
+      }
       channel.ack(message)
   })
 }
