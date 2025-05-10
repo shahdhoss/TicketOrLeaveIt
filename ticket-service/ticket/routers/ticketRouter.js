@@ -1,4 +1,3 @@
-const { response } = require('../../../payment-service/app');
 const {
    ticketsPOST,
    ticketsIdGET,
@@ -6,11 +5,17 @@ const {
    ticketsIdDELETE,
    ticketsHealth
 } = require('../services/DefaultService');
-
+const { extractUserFromToken } = require('../middleware/authMiddleware');
 const express = require('express');
 const router = express.Router();
 
-router.post('/', (req, res) => {
+// Public routes
+router.get("/health", (req, res) => {
+    ticketsHealth().then((response) => res.json(response)).catch((error) => res.status(error.code || 500).json(error));
+});
+
+// Protected routes
+router.post('/', extractUserFromToken, (req, res) => {
    const ticket = req.body;
    if (!ticket) {
        return res.status(400).json({ error: "Ticket data is required" });
@@ -20,41 +25,26 @@ router.post('/', (req, res) => {
        .catch((error) => res.status(error.code || 500).json(error));
 });
 
-
-router.get('/:id', (req, res) => {
-   const id = req.params;
-   if (!id) {
-       return res.status(400).json({ error: "Ticket ID is required" });
-   }
-   ticketsIdGET(id)
-       .then((response) => res.json(response))
-       .catch((error) => res.status(error.code || 500).json(error));
+router.get('/:id', extractUserFromToken, (req, res) => {
+    const id = req.params;
+    ticketsIdGET(id)
+        .then((response) => res.json(response))
+        .catch((error) => res.status(error.code || 500).json(error));
 });
 
-router.patch('/:id', (req, res) => {
-   const id = req.params.id;
-   const ticket = req.body;
-   if (!id || !ticket) {
-       return res.status(400).json({ error: "Ticket ID and update data are required" });
-   }
-   ticketsIdPATCH(id, ticket)
-       .then((response) => res.json(response))
-       .catch((error) => res.status(error.code || 500).json(error));
+router.patch('/:id', extractUserFromToken, (req, res) => {
+    const id = req.params;
+    const ticket = req.body;
+    ticketsIdPATCH(id, ticket["body"])
+        .then((response) => res.json(response))
+        .catch((error) => res.status(error.code || 500).json(error));
 });
 
-
-router.delete('/:id', (req, res) => {
-   const id = req.params;
-   if (!id) {
-       return res.status(400).json({ error: "Ticket ID is required" });
-   }
-   ticketsIdDELETE(id)
-       .then((response) => res.json(response))
-       .catch((error) => res.status(error.code || 500).json(error));
+router.delete('/:id', extractUserFromToken, (req, res) => {
+    const id = req.params;
+    ticketsIdDELETE(id)
+        .then((response) => res.json(response))
+        .catch((error) => res.status(error.code || 500).json(error));
 });
-
-router.get("/health" , (req,res)=>{
-    ticketsHealth.then((response)=> res.json(response)).catch((error)=> res.status(404).json(error))
-})
 
 module.exports = router;

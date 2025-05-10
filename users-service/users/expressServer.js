@@ -11,6 +11,7 @@ const bodyParser = require('body-parser');
 const OpenApiValidator = require('express-openapi-validator');
 const logger = require('./logger');
 const config = require('./config');
+const messageConsumer = require('./services/messageConsumer');
 
 class ExpressServer {
   constructor(port, openApiYaml) {
@@ -55,18 +56,19 @@ class ExpressServer {
     );
   }
 
-  launch() {
-    // eslint-disable-next-line no-unused-vars
-    this.app.use((err, req, res, next) => {
-      // format errors
-      res.status(err.status || 500).json({
-        message: err.message || err,
-        errors: err.errors || '',
+  async start() {
+    try {
+      // Start RabbitMQ consumer
+      await messageConsumer.startConsuming();
+      
+      // Start Express server
+      this.app.listen(this.port, () => {
+        console.log(`Server is running on port ${this.port}`);
       });
-    });
-
-    http.createServer(this.app).listen(this.port);
-    console.log(`Listening on port ${this.port}`);
+    } catch (error) {
+      console.error('Failed to start server:', error);
+      process.exit(1);
+    }
   }
 
   async close() {

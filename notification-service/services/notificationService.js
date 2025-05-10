@@ -20,20 +20,18 @@ const dummyPaymentData = {
 
 const handleTicketCreation = async (ticketData) => {
   try {
-    // For testing, use dummy data
-    const data = dummyTicketData;
-    
-    logger.info('Processing ticket creation notification');
+    logger.info('Processing ticket creation notification:', ticketData);
     
     // Send confirmation email
     await sendEmail({
-      to: data.user_email,
+      to: ticketData.user_email,
       subject: 'Ticket Created Successfully',
-      text: `Your ticket for ${data.event_name} has been created successfully.`,
+      text: `Your ticket for ${ticketData.event_name} has been created successfully.`,
       html: `
         <h1>Ticket Created Successfully</h1>
-        <p>Your ticket for ${data.event_name} has been created successfully.</p>
-        <p>Price: $${data.price}</p>
+        <p>Your ticket for ${ticketData.event_name} has been created successfully.</p>
+        <p>Ticket ID: ${ticketData.ticket_id}</p>
+        <p>Price: $${ticketData.price}</p>
       `
     });
 
@@ -46,22 +44,20 @@ const handleTicketCreation = async (ticketData) => {
 
 const handlePaymentConfirmation = async (paymentData) => {
   try {
-    // dummy for testing
-    const data = dummyPaymentData;
-    
-    logger.info('Processing payment confirmation notification');
+    logger.info('Processing payment confirmation notification:', paymentData);
     
     // Send confirmation email
     await sendEmail({
-      to: data.user_email,
+      to: paymentData.user_email,
       subject: 'Payment Confirmed',
-      text: `Your payment for ${data.event_name} has been confirmed.`,
+      text: `Your payment for ${paymentData.event_name} has been confirmed.`,
       html: `
         <h1>Payment Confirmed</h1>
-        <p>Your payment for ${data.event_name} has been confirmed.</p>
-        <p>Amount: $${data.price}</p>
-        <p>Payment Method: ${data.payment_method}</p>
-        <p>Payment Date: ${data.payment_date}</p>
+        <p>Your payment for ${paymentData.event_name} has been confirmed.</p>
+        <p>Payment ID: ${paymentData.payment_id}</p>
+        <p>Ticket ID: ${paymentData.ticket_id}</p>
+        <p>Amount: $${paymentData.amount}</p>
+        <p>Payment Date: ${paymentData.payment_date}</p>
       `
     });
 

@@ -13,19 +13,42 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
-        password: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
         email: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            unique: true,
+            validate: {
+                isEmail: true
+            }
         },
         profilePicture: {
             type: DataTypes.BLOB,
             allowNull: true
+        },
+        oauth_provider: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: 'local'
+        },
+        oauth_id: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        last_login: {
+            type: DataTypes.DATE,
+            allowNull: true
         }
     }, {
+        timestamps: true,
+        indexes: [
+            {
+                unique: true,
+                fields: ['email']
+            },
+            {
+                fields: ['oauth_provider', 'oauth_id']
+            }
+        ]
     });
-    return users
-}
+    return users;
+};

@@ -2,78 +2,56 @@ const amqp = require('amqplib');
 const logger = require('../utils/logger');
 const { handleTicketCreation, handlePaymentConfirmation } = require('../services/notificationService');
 
-async function setupMessageConsumers() {
+const startConsuming = async () => {
   try {
-    const connection = await amqp.connect(process.env.RABBITMQ_URL || 'amqp://localhost');
+    const connection = await amqp.connect(process.env.RABBITMQ_URL);
     const channel = await connection.createChannel();
-    
-    // Listen to ticket creation
-    const ticketExchange = 'confirmTicket';
-    const ticketQueue = 'notificationTicketQueue';
-    const ticketRoutingKey = 'tickets->payment';
 
-    await channel.assertExchange(ticketExchange, 'direct', { durable: true });
-    await channel.assertQueue(ticketQueue, { durable: true });
-    await channel.bindQueue(ticketQueue, ticketExchange, ticketRoutingKey);
+    // Declare exchanges
+    await channel.assertExchange('ticketCreation', 'topic', { durable: true });
+    await channel.assertExchange('paymentConfirmation', 'topic', { durable: true });
 
-    // Listen to payment confirmation
-    const paymentExchange = 'eventReservation';
-    const paymentQueue = 'notificationPaymentQueue';
-    const paymentRoutingKey = 'payment->events';
+    // Declare queues
+    await channel.assertQueue('ticket_creation_notifications', { durable: true });
+    await channel.assertQueue('payment_confirmation_notifications', { durable: true });
 
-    await channel.assertExchange(paymentExchange, 'direct', { durable: true });
-    await channel.assertQueue(paymentQueue, { durable: true });
-    await channel.bindQueue(paymentQueue, paymentExchange, paymentRoutingKey);
+    // Bind queues to exchanges
+    await channel.bindQueue('ticket_creation_notifications', 'ticketCreation', 'tickets->notification');
+    await channel.bindQueue('payment_confirmation_notifications', 'paymentConfirmation', 'payment->notification');
 
-    logger.info('RabbitMQ connections established');
-
-    // Handle ticket creation messages
-    channel.consume(ticketQueue, async (message) => {
-      if (message !== null) {
-        const data = JSON.parse(message.content.toString());
-        logger.info('Received ticket creation:', data);
-        
-        try {
-          await handleTicketCreation(data);
-          channel.ack(message);
-        } catch (error) {
-          logger.error('Error processing ticket creation:', error);
-          channel.nack(message, false, true);
-        }
+    // Consume ticket creation messages
+    channel.consume('ticket_creation_notifications', async (msg) => {
+      try {
+        const content = JSON.parse(msg.content.toString());
+        logger.info('Received ticket creation message:', content);
+        await handleTicketCreation(content);
+        channel.ack(msg);
+      } catch (error) {
+        logger.error('Error processing ticket creation message:', error);
+        channel.nack(msg, false, true);
       }
     });
 
-    // Handle payment confirmation messages
-    channel.consume(paymentQueue, async (message) => {
-      if (message !== null) {
-        const data = JSON.parse(message.content.toString());
-        logger.info('Received payment confirmation:', data);
-        
-        try {
-          await handlePaymentConfirmation(data);
-          channel.ack(message);
-        } catch (error) {
-          logger.error('Error processing payment confirmation:', error);
-          channel.nack(message, false, true);
-        }
+    // Consume payment confirmation messages
+    channel.consume('payment_confirmation_notifications', async (msg) => {
+      try {
+        const content = JSON.parse(msg.content.toString());
+        logger.info('Received payment confirmation message:', content);
+        await handlePaymentConfirmation(content);
+        channel.ack(msg);
+      } catch (error) {
+        logger.error('Error processing payment confirmation message:', error);
+        channel.nack(msg, false, true);
       }
     });
 
-    // Handle connection errors
-    connection.on('error', (error) => {
-      logger.error('RabbitMQ connection error:', error);
-      setTimeout(setupMessageConsumers, 5000);
-    });
-
-    connection.on('close', () => {
-      logger.error('RabbitMQ connection closed');
-      setTimeout(setupMessageConsumers, 5000);
-    });
-
+    logger.info('Notification service started consuming messages');
   } catch (error) {
-    logger.error('RabbitMQ setup error:', error);
-    setTimeout(setupMessageConsumers, 5000);
+    logger.error('Error starting message consumer:', error);
+    throw error;
   }
-}
+};
 
-module.exports = setupMessageConsumers; 
+module.exports = {
+  startConsuming
+}; 

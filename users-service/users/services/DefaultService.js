@@ -3,6 +3,7 @@ const Service = require('./Service');
 const {users}= require("../models");
 const withBreaker = require("../circuit_breaker/breaker");
 const { use } = require('chai');
+const logger = require('../utils/logger');
 /**
 * Delete a user by id
 *
@@ -21,6 +22,7 @@ const usersIdDELETE = ( id ) => new Promise(
         id
       }));
     } catch (e) {
+      logger.error('Error in usersIdDELETE:', e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -37,17 +39,18 @@ const usersIdDELETE = ( id ) => new Promise(
 const usersIdGET = ( id ) => new Promise(
   async (resolve, reject) => {
     try {
-      const userid= id.id
-      const user = await users.findOne({where:{id:userid}})
+      const userId = id.id
+      const user = await users.findOne({where:{id:userId}})
       if(!user){
         return reject(Service.rejectResponse("User not found", 404,));
       }
-      const {first_name, last_name, email, profilePicture} = user
-      const userData = {first_name, last_name, email, profilePicture}
+      const {first_name, last_name, email, profilePicture, oauth_provider, last_login} = user
+      const userData = {first_name, last_name, email, profilePicture, oauth_provider, last_login}
       resolve(Service.successResponse({
         user:userData,
       }));
     } catch (e) {
+      logger.error('Error in usersIdGET:', e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -69,6 +72,10 @@ const usersIdPATCH = ( id ) => new Promise(
       const userId = id.id
       const userData = id.body
       console.log(userData)
+      // Remove sensitive fields from update
+      delete userData.password;
+      delete userData.oauth_provider;
+      delete userData.oauth_id;
       const update = await users.update(userData, {where:{id:userId}})
       if(update[0]!=1){
         reject(Service.rejectResponse("user not found","404"))
@@ -77,7 +84,7 @@ const usersIdPATCH = ( id ) => new Promise(
         user:userData,
       }));
     } catch (e) {
-      console.log(e)
+      logger.error('Error in usersIdPATCH:', e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -86,7 +93,7 @@ const usersIdPATCH = ( id ) => new Promise(
   },
 );
 /**
-* Add a new user
+* Add a new user from OAuth data
 *
 * user User 
 * no response value expected for this operation
@@ -94,13 +101,40 @@ const usersIdPATCH = ( id ) => new Promise(
 const usersPOST = ( user ) => new Promise(
   async (resolve, reject) => {
     try {
-      const {first_name, last_name, email,password} = user.body
-      const userData = {first_name, last_name, email,password}
+      const {first_name, last_name, email, oauth_provider, oauth_id} = user.body
+      // Check if user already exists
+      const existingUser = await users.findOne({ 
+        where: { 
+          email: email 
+        } 
+      });
+
+      if (existingUser) {
+        // Update last login
+        await existingUser.update({ last_login: new Date() });
+        return resolve(Service.successResponse({
+          user: existingUser,
+          message: 'User already exists, updated last login'
+        }));
+      }
+
+      // Create new user
+      const userData = {
+        first_name,
+        last_name,
+        email,
+        oauth_provider,
+        oauth_id,
+        last_login: new Date()
+      };
+
       const userCreated = await users.create(userData)
       resolve(Service.successResponse({
         user:userCreated,
+        message: 'User created successfully'
       }));
     } catch (e) {
+      logger.error('Error in usersPOST:', e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,

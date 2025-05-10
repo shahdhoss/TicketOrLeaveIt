@@ -96,7 +96,7 @@ services:
   user-service:
     build:
       context: ./users-service
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - "8081:8080"
     environment:
@@ -120,7 +120,7 @@ services:
   vendor-service:
     build:
       context: ./vendor-service
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - "8082:8080"
       - "50051:50051"
@@ -145,7 +145,7 @@ services:
   organizers-service:
     build:
       context: ./organizers-service
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - "8083:8080"
     environment:
@@ -169,7 +169,7 @@ services:
   events-service:
     build:
       context: ./events-service
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - "8084:8080"
     environment:
@@ -194,13 +194,13 @@ services:
   auth-service:
     build: 
       context: ./Auth
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - "8086:8000"
     env_file: ./Auth/.env
     environment:
-    - REDIRECT_URI=http://localhost/auth/google/callback
-    - NODE_ENV=development
+      - REDIRECT_URI=http://localhost/auth/google/callback
+      - NODE_ENV=development
     depends_on:
       - auth-db
 
@@ -216,7 +216,7 @@ services:
   ticket-service:  
     build:
       context: ./ticket-service
-      dockerfile: dockerfile 
+      dockerfile: Dockerfile
     ports:
       - "8087:8080"  
     environment:
@@ -273,16 +273,16 @@ services:
   notification-service:
     build:
       context: ./notification-service
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - "8088:8083"
     environment:
-      RABBITMQ_URL: amqp://rabbitmq
-      REDIS_URL: redis://redis:6379
-      SMTP_HOST: smtp.gmail.com
-      SMTP_PORT: 587
-      SMTP_USER: ${SMTP_USER}
-      SMTP_PASS: ${SMTP_PASS}
+      RABBITMQ_URL: amqp://localhost
+      REDIS_URL: redis://localhost:6379
+      PORT: 8083
+      RESEND_API_KEY: re_Rs56gqd8_21Muc3jUKGkH2jP42k6Hy7gf
+      RESEND_FROM_EMAIL: onboarding@resend.dev
+      LOG_LEVEL: info
     depends_on:
       - rabbitmq
       - redis

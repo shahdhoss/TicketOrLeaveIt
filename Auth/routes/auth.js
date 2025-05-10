@@ -3,6 +3,7 @@ const axios = require('axios');
 const User = require('../models/User');
 const { createAccessToken, createRefreshToken, verifyToken } = require('../utils/jwt');
 const verifyAccessToken = require('../middleware/verifyToken');
+const messageProducer = require('../services/messageProducer');
 const router = express.Router();
 require('dotenv').config();
 
@@ -40,11 +41,13 @@ router.get('/google/callback', async (req, res) => {
     });
 
     const { sub, email, name } = userResponse.data;
+    const [firstName, ...lastNameParts] = name.split(' ');
+    const lastName = lastNameParts.join(' ');
 
-    let user = await User.findOne({ where: { google_sub: sub } });
-
-    if (!user) {
-      user = await User.create({
+    // Create user in Auth service
+    let authUser = await User.findOne({ where: { google_sub: sub } });
+    if (!authUser) {
+      authUser = await User.create({
         google_sub: sub,
         email,
         name,
@@ -52,12 +55,21 @@ router.get('/google/callback', async (req, res) => {
       });
     }
 
+    // Publish user creation message to RabbitMQ
+    await messageProducer.publishUserCreation({
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      oauth_provider: 'google',
+      oauth_id: sub
+    });
+
     const payload = {
-      user_id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      sub: user.google_sub
+      user_id: authUser.id,
+      email: authUser.email,
+      name: authUser.name,
+      role: authUser.role,
+      sub: authUser.google_sub
     };
 
     const access_token = createAccessToken(payload);
@@ -66,7 +78,13 @@ router.get('/google/callback', async (req, res) => {
     res.json({
       message: 'Logged in',
       access_token,
-      refresh_token
+      refresh_token,
+      user: {
+        id: authUser.id,
+        email: authUser.email,
+        name: authUser.name,
+        role: authUser.role
+      }
     });
 
   } catch (err) {
@@ -98,7 +116,6 @@ router.post('/token', (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
-
   res.json({ message: 'Logged out (client should delete tokens)' });
 });
 
