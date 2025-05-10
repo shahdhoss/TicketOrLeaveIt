@@ -5,7 +5,7 @@ const {ticket} = require("../models")
 async function recievingReservationFromEvents(){
     const exchange = "reserveTicket"
     const bindingKey = "events->tickets"
-    const con = await amqp.connect("amqp://localhost")
+    const con = await amqp.connect(process.env.RABBITMQ_URL||"amqp://localhost")
     const channel = await con.createChannel()
     await channel.assertExchange(exchange, "direct", {durable: true})
     const q = await channel.assertQueue("tickets", { durable: true });
@@ -22,7 +22,7 @@ async function recievingReservationFromEvents(){
 async function recievingMessageFromPayment(){
     const exchange = "ticketReservation"
     const bindingKey = "payment->tickets"
-    const con = await amqp.connect("amqp://localhost")
+    const con = await amqp.connect(process.env.RABBITMQ_URL ||"amqp://localhost")
     const channel = await con.createChannel()
     await channel.assertExchange(exchange, "direct", {durable: true})
     const q = await channel.assertQueue("updatedTickets", { durable: true });

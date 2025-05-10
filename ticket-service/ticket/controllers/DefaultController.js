@@ -8,7 +8,6 @@
 
 const Controller = require('./Controller');
 const service = require('../services/DefaultService');
-const { request } = require('../../../payment-service/app');
 
 const ticketsPOST = async (request, response) => {
   await Controller.handleRequest(request, response, service.ticketsPOST);

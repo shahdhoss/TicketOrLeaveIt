@@ -229,6 +229,7 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: tickets
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
     depends_on:
       - ticket-db
 
