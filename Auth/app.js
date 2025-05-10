@@ -4,6 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const { sequelize } = require('./config/database');
+const { connect: connectRabbitMQ } = require('./messaging/messagePublisher');
 
 const app = express();
 app.use(express.json());
@@ -22,7 +23,10 @@ app.listen(PORT, async () => {
   try {
     await sequelize.authenticate();
     console.log('Database connected');
+    
+    // Initialize RabbitMQ connection
+    await connectRabbitMQ();
   } catch (err) {
-    console.error('DB connection failed:', err);
+    console.error('Initialization error:', err);
   }
 });

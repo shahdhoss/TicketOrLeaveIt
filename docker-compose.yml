@@ -199,10 +199,12 @@ services:
       - "8086:8000"
     env_file: ./Auth/.env
     environment:
-    - REDIRECT_URI=http://localhost/auth/google/callback
-    - NODE_ENV=development
+      - REDIRECT_URI=http://localhost/auth/google/callback
+      - NODE_ENV=development
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
       - auth-db
+      - rabbitmq
 
   auth-db:
     image: postgres:15
