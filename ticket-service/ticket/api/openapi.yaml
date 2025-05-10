@@ -100,8 +100,6 @@ components:
     TicketInput:
       type: object
       properties:
-        user_id:
-          type: integer
         seat_number:
           type: string
         status:
@@ -110,7 +108,6 @@ components:
         price:
           type: number
       required:
-        - user_id
         - seat_number
         - status
         - price

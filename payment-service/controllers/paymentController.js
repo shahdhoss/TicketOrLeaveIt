@@ -2,9 +2,10 @@ const { Payment } = require('../models');
 const PaymobService = require('../services/paymobService');
 const redisClient = require("../redisClient");
 const isHealthy = require("../messaging/checkHealth")
-const { paymentMetrics } = require('../metrics/index');
 const {updateTicketReservation, updateEventCapacity}= require("../messaging/sendMessage")
 const axios = require("axios")
+const { paymentMetrics } = require('../metrics/index');
+
 
 exports.initiatePayment = async (req, res) => {
   const startTime = Date.now();
@@ -16,38 +17,41 @@ exports.initiatePayment = async (req, res) => {
     paymentMetrics.amounts.observe(req.body.amount);
     const ticketsQueue = "updatedTickets"
     const eventsQueue = "eventMessages"
-    const {userId, amount} = req.body
-    const eventId = await redisClient.get(`reservation:${userId}`)
-    console.log("success from redis: ", eventId)
+   
+    const {ticketId} = req.body
+    const payment_info = await redisClient.get(`reservation:${ticketId}`)
+    console.log("payment_info: ", payment_info)
+    if (!payment_info){
+        throw new Error('Reservation not found in Redis');
+    }
+    const {event_id, user_id, reservation_id, amount} = JSON.parse(payment_info)
+    console.log("success from redis: ", event_id)
 
-    if (!userId || !eventId || !amount || isNaN(amount) || amount < 1) {
-      console.error('❌ Validation Failed:', { userId, eventId, amount });
+    if (!event_id || !user_id || !amount || isNaN(amount) || amount < 1) {
+      console.error('❌ Validation Failed:', { user_id, event_id, amount });
       return res.status(400).json({
         success: false,
         error: "Invalid request. Requires userId (number), eventId (number), amount (≥1 EGP)"
       });
     }
+
     const eventsHealth = await axios.get("http://localhost:8082/v1/events/health")
     const ticketsHealth = await axios.get("http://localhost:8080/v1/tickets/health")
     if(isHealthy(ticketsQueue) && isHealthy(eventsQueue) && eventsHealth.status === 200 && ticketsHealth.status === 200){       //a bit of coupling but its better than reserving a non existent seat
-      const paymentData = await PaymobService.createPayment(amount, userId, eventId);
+      const paymentData = await PaymobService.createPayment(amount, user_id, event_id);
       console.log("payment data: ", paymentData)
       await Payment.create({
-        userId,
-        eventId,
+        userId: user_id,
+        eventId: event_id,
         amount,
         paymobOrderId: paymentData.orderId,
       });
 
       console.log(`\n✅ Payment Initiated in ${Date.now() - startTime}ms`);
-      const message = {user_id: userId, event_id: eventId}
-      sendReservationToTickets(message)
-      paymentMetrics.requests.labels('POST', 'success').inc();
-    endTimer();
       const updated_ticket_status = {user_id: userId, message: "confirmed"}
       const updated_capacity= {event_id: eventId, message: "Decrement"}
       updateTicketReservation(updated_ticket_status)
-      updateEventCapacity(updated_capacity)
+      updateEventCapacityandReservationStatus(updated_capacity)
       
       return res.json({ 
         success: true,
@@ -55,7 +59,7 @@ exports.initiatePayment = async (req, res) => {
         orderId: paymentData.orderId
       });
   }
-  const message = {user_id: userId, message: "failed" }
+  const message = {user_id: user_id, event_id: event_id, ticketId: ticketId, message: "failed" }
   updateTicketReservation(message)
   res.status({success:false})
   
@@ -119,3 +123,10 @@ exports.refundPayment = async (req, res) => {
   }
 };
 
+exports.checkHealth = async (req, res) => {
+  try{
+    res.status(200).json({status: "ok"})
+  } catch(error){
+    res.status(500)
+  }
+}

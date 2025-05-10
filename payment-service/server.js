@@ -1,5 +1,5 @@
 require('dotenv').config();
-const recieveReservationRequestFromTickets = require('./messaging/recieveMessage');
+const {recieveReservationRequestFromTickets, recieveCancellationRequestFromEvents} = require('./messaging/recieveMessage');
 
 console.log('\n=== ENVIRONMENT DEBUG ===');
 console.log('Current Directory:', process.cwd());
@@ -14,7 +14,7 @@ console.log('=======================\n');
 const app = require('./app');
 const PORT = process.env.PORT || 8081;
 recieveReservationRequestFromTickets()
-
+recieveCancellationRequestFromEvents()
 app.listen(PORT, () => {
   console.log(`\nServer running on port ${PORT}`);
   console.log('Debug Mode: ON - All logs active\n');

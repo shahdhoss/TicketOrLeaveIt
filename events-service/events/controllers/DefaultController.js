@@ -8,8 +8,6 @@
 
 const Controller = require('./Controller');
 const service = require('../services/DefaultService');
-const { response } = require('express');
-const { request } = require('../../../payment-service/app');
 
 const eventsIdDELETE = async (request, response) => {
   await Controller.handleRequest(request, response, service.eventsIdDELETE);
@@ -35,6 +33,9 @@ const eventsReserve = async (request, response)=>{
 const eventsHealth = async (request, response)=>{
   await Controller.handleRequest(request, response, service.eventsHealth)
 }
+const eventsCancel = async(request, response)=>{
+  await Controller.handleRequest(request, response, service.eventsCancel)
+}
 module.exports = {
   eventsIdDELETE,
   eventsIdGET,
@@ -42,5 +43,6 @@ module.exports = {
   eventsPOST,
   eventsSearch,
   eventsReserve,
-  eventsHealth
+  eventsHealth,
+  eventsCancel
 };

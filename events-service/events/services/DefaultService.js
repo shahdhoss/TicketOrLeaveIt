@@ -9,8 +9,11 @@ const es_client = new Client({
   node: "http://localhost:9200",
   apiVersion: '8.x'
 });
-const sendReservationToTickets = require("../messaging/sendMessage")
+const {sendReservationToTickets, sendCancellationToPayment} = require("../messaging/sendMessage")
 const isHealthy = require("../messaging/checkHealth")
+const axios = require("axios")
+const { v4: uuidv4 } = require('uuid');
+
 /**
 * Delete an event by id
 *
@@ -238,17 +241,41 @@ const eventsReserve = (reservation) => new Promise(
     try{
       const tickets_queue = "tickets"
       const {user_id, event_id} = reservation.body
-      const resObject = {user_id, event_id}
+      const reservation_id = uuidv4()
+      const resObject = {id: reservation_id ,user_id, event_id}
       const newReservation = await reservations.create(resObject)
       if(!newReservation){
         reject(Service.rejectResponse("Reservation isn't successful", 400))
       }
+      const reservation_object = {reservation_id: reservation_id, user_id: user_id, event_id: event_id }
       if (isHealthy(tickets_queue)){
-        sendReservationToTickets(resObject)
-        resolve(Service.successResponse({reservation: resObject}))
+        sendReservationToTickets(reservation_object)
+        resolve(Service.successResponse({reservation: reservation_object}))
       }
       reject(Service.rejectResponse("Payment queue is not healthy", 400))
     }catch(e){
+      console.log(e)
+      reject(Service.rejectResponse(e, e.status || 405))
+    }
+  }
+)
+
+const eventsCancel = (reservation) => new Promise(
+  async (resolve, reject)=>{
+    try{
+      const cancellations_queue = "cancellations"
+      const {user_id, event_id}= reservation.body
+      const resObject = {user_id, event_id}
+      const payment_health = axios.get("http://localhost:8081/api/payments/health")
+      if(isHealthy(cancellations_queue) && (await payment_health).status ===200){
+        const updateReservation = await reservations.update({status: "canceled"}, {where:{id: event_id}})
+        if(!updateReservation){
+          reject(Service.rejectResponse("Reservation isn't successful", 400))
+        }
+        sendCancellationToPayment(resObject)
+        resolve(Service.successResponse({reservation: resObject}))
+     }
+    }catch(error){
       console.log(e)
       reject(Service.rejectResponse(e, e.status || 405))
     }
@@ -288,6 +315,10 @@ module.exports = {
     )),
   eventsReserve: (reservation) =>
     withBreaker(eventsReserve)(reservation).catch((e) => Promise.reject(
+      Service.rejectResponse(e.message || "Invalid input", e.status || 405)
+    )),
+  eventsCancel: (reservation) =>
+    withBreaker(eventsCancel)(reservation).catch((e) => Promise.reject(
       Service.rejectResponse(e.message || "Invalid input", e.status || 405)
     )),
   eventsHealth

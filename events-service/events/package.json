@@ -34,6 +34,8 @@
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.2",
     "swagger-ui-express": "^4.0.2",
+    "uuid": "^11.1.0",
+    "uuidv4": "^6.2.13",
     "winston": "^3.2.1"
   },
   "devDependencies": {

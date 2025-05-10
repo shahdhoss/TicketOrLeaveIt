@@ -3,18 +3,25 @@ const { ticket } = require("../models");
 const withBreaker = require("../circuit-breaker/breaker");
 const redisClient = require("../redisClient");
 const sendReservationToPayments = require("../messaging/sendMessages")
+const { v4: uuidv4 } = require('uuid');
 
 const ticketsPOST = (ticketReq) => new Promise(
   async (resolve, reject) => {
     try {
-      const {user_id, seat_number, price, status} = ticketReq.body
-      const event_id = await redisClient.get(`reservation:${user_id}`)
-      const ticketData = {event_id, user_id, seat_number, price, status}
+      const {reservation_id, seat_number, price, status} = ticketReq.body
+      console.log(reservation_id)
+      const reservationData  = await redisClient.get(`reservation:${reservation_id}`)
+      if (!reservationData) {
+        throw new Error('Reservation not found in Redis');
+      }
+      const { user_id, event_id } = JSON.parse(reservationData);
+      const ticket_id = uuidv4()
+      const ticketData = {id: ticket_id, event_id, user_id, seat_number, price, status}
       const newTicket = await ticket.create(ticketData)
       if (!newTicket){
         reject(Service.rejectResponse("Ticket haven't been created in db", 400))
       }
-      const message = {user_id: user_id, event_id: event_id}
+      const message = {user_id: user_id, event_id: event_id, ticket_id:ticket_id, reservation_id:reservation_id ,amount: price}
       sendReservationToPayments(message)
       resolve(Service.successResponse({ new_ticket: newTicket }));
     } catch (e) {

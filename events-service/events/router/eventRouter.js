@@ -49,6 +49,14 @@ router.post("/reserve", (req,res)=>{
     eventsReserve(reservation["body"]).then((response)=> res.json(response)).catch((error)=> res.status(error.code).json(error))
 })
 
+router.post("/cancel", (req,res)=>{
+    const reservation = req.body
+    if(!reservation){
+        return res.status(400).json({error:"Reservation info is needed"})
+    }
+    eventsReserve(reservation["body"]).then((response)=> res.json(response)).catch((error)=> res.status(error.code).json(error))
+})
+
 router.get("/health", (req,res)=>{
     eventsHealth().then((response)=>res.json(response)).catch((error)=> res.status(error.code).json(error))
 })

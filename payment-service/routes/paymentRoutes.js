@@ -7,6 +7,7 @@ const webhookController = require('../controllers/webhookController');
 
 router.post('/payments', paymentController.initiatePayment);
 router.post('/payments/refund/:id', paymentController.refundPayment);
+router.get("/health",paymentController.checkHealth)
 router.get('/payments/metrics', async (req, res) => {
   res.set('Content-Type', register.contentType);
   res.end(await register.metrics());
