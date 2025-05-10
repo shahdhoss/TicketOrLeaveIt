@@ -2,25 +2,23 @@ const { Payment } = require('../models');
 const PaymobService = require('../services/paymobService');
 const redisClient = require("../redisClient");
 const isHealthy = require("../messaging/checkHealth")
-const {updateTicketReservation, updateEventCapacity}= require("../messaging/sendMessage")
-const axios = require("axios")
+const {updateTicketReservation, updateEventCapacityandReservationStatus}= require("../messaging/sendMessage")
+const axios = require("axios");
 const { paymentMetrics } = require('../metrics/index');
 
-
 exports.initiatePayment = async (req, res) => {
-  const startTime = Date.now();
+  // const endTimer = paymentMetrics.processDuration.startTimer();
   console.log(`\n=== NEW PAYMENT REQUEST ===\n${JSON.stringify(req.body, null, 2)}`);
   try {
-     paymentMetrics.requests.labels('POST', 'started').inc();
-    paymentMetrics.amounts.observe(req.body.amount);
-    paymentMetrics.requests.labels('POST', 'started').inc();
-    paymentMetrics.amounts.observe(req.body.amount);
+    // paymentMetrics.requests.labels('POST', 'started').inc();
+    // paymentMetrics.amounts.observe(req.body.amount);
+    // paymentMetrics.requests.labels('POST', 'started').inc();
+    // paymentMetrics.amounts.observe(req.body.amount);
     const ticketsQueue = "updatedTickets"
     const eventsQueue = "eventMessages"
    
     const {ticketId} = req.body
     const payment_info = await redisClient.get(`reservation:${ticketId}`)
-    console.log("payment_info: ", payment_info)
     if (!payment_info){
         throw new Error('Reservation not found in Redis');
     }
@@ -45,14 +43,16 @@ exports.initiatePayment = async (req, res) => {
         eventId: event_id,
         amount,
         paymobOrderId: paymentData.orderId,
+        reservationId: reservation_id,
+        ticketId: ticketId
       });
 
-      console.log(`\n✅ Payment Initiated in ${Date.now() - startTime}ms`);
-      const updated_ticket_status = {user_id: userId, message: "confirmed"}
-      const updated_capacity= {event_id: eventId, message: "Decrement"}
+      const updated_ticket_status = {user_id: user_id, event_id: event_id, ticket_id: ticketId, message: "confirmed"}
+      const updated_capacity = {user_id: user_id, event_id: event_id, reservation_id:reservation_id, message: "Decrement", payment_id: paymentData.orderId, ticket_id: ticketId }
       updateTicketReservation(updated_ticket_status)
       updateEventCapacityandReservationStatus(updated_capacity)
-      
+      // paymentMetrics.requests.labels('POST', 'success').inc();
+      // endTimer();
       return res.json({ 
         success: true,
         paymentUrl: paymentData.paymentUrl,
@@ -64,12 +64,11 @@ exports.initiatePayment = async (req, res) => {
   res.status({success:false})
   
 } catch (error) {
-  paymentMetrics.requests.labels('POST', 'error').inc();
-    endTimer();
+  // paymentMetrics.requests.labels('POST', 'error').inc();
+  //  endTimer();
     console.error('\n❌ CONTROLLER ERROR:', {
       error: error.message,
       stack: error.stack,
-      duration: `${Date.now() - startTime}ms`
     });
     
     res.status(500).json({
@@ -83,15 +82,13 @@ exports.initiatePayment = async (req, res) => {
 };
 
 exports.refundPayment = async (req, res) => {
-    const endTimer = paymentMetrics.refundDuration.startTimer();
-
+  // const endTimer = paymentMetrics.refundDuration.startTimer();
   const { id } = req.params;
 
   console.log(`\n🔁 Initiating refund for payment ID: ${id}`);
 
   try {
-        paymentMetrics.refunds.labels('attempted').inc();
-
+    paymentMetrics.refunds.labels('attempted').inc();
     const payment = await Payment.findByPk(id);
 
     if (!payment) {
@@ -101,11 +98,18 @@ exports.refundPayment = async (req, res) => {
         message: 'Payment not found',
       });
     }
-
     payment.isVerified = 'refunded';
     await payment.save();
- paymentMetrics.refunds.labels('success').inc();
-    endTimer();
+    paymentMetrics.refunds.labels('success').inc();
+    
+    //declining the ticket and the reservation
+    const { id: paymentId, userId, eventId, amount, paymobOrderId, isVerified, reservationId, ticketId, createdAt, updatedAt } = payment.get({ plain: true });
+    const updated_ticket_status = {user_id: userId, event_id: eventId, ticket_id: ticketId, message: "failed"}
+    const updated_capacity = {user_id: userId, event_id: eventId, reservation_id:reservationId, message: "Increment", payment_id: paymobOrderId, ticket_id: ticketId }
+    updateTicketReservation(updated_ticket_status)
+    updateEventCapacityandReservationStatus(updated_capacity)
+    
+    // endTimer();
     console.log(`✅ Payment ID ${id} marked as refunded.`);
     res.json({
       success: true,
@@ -114,7 +118,7 @@ exports.refundPayment = async (req, res) => {
 
   } catch (error) {
     paymentMetrics.refunds.labels('failed').inc();
-    endTimer();
+    // endTimer();
     console.error(`❌ Refund Error for Payment ID ${id}:`, error.message);
     res.status(500).json({
       success: false,

@@ -72,3 +72,6 @@
 {"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-09T16:53:24.207Z"}
 {"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-09T16:55:27.161Z"}
 {"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-09T17:23:37.029Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-09T17:34:49.428Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-09T17:50:28.208Z"}
+{"level":"info","message":"Express server running","service":"tickets-service","timestamp":"2025-05-09T19:19:32.161Z"}
