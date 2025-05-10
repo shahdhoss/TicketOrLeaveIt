@@ -28,9 +28,8 @@ async function updateCapacityandReservationStatus(message){
         }
         else if (message.message == "Increment"){
             await events.increment('capacity', { by: 1, where: { id: message.event_id } })
-
+            await reservations.update({status: "canceled"}, {where:{id: message.reservation_id}})
         }
-
     }catch(e){
         console.log(e)
     }

@@ -25,6 +25,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         defaultValue: 'true', 
       },
+      reservationId:{
+        type: DataTypes.UUID,
+        allowNull: false
+      },
+      ticketId:{
+        type: DataTypes.UUID,
+        allowNull: false
+      },
       createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
