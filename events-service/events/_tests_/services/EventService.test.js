@@ -1,94 +1,121 @@
 const EventService = require('../../services/eventService');
-const { Event, Reservation } = require('../../models');
-const { Client } = require('@elastic/elasticsearch');
-const grpcClient = require('../../grpcClient');
 const axios = require('axios');
+const crypto = require('crypto');
 
-jest.mock('../../models');
-jest.mock('@elastic/elasticsearch');
-jest.mock('../../grpcClient');
 jest.mock('axios');
+jest.mock('crypto');
 
 describe('EventService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.EVENT_API_KEY = 'event_key_123';
+    process.env.EVENT_VENDOR_ID = 'vendor_456';
   });
 
   describe('createEvent', () => {
-    it('should create an event successfully', async () => {
-      Event.create.mockResolvedValue({ id: 1 });
+    const mockAuthResponse = {
+      data: {
+        token: 'auth_event_token_123'
+      }
+    };
 
-      const event = await EventService.createEvent({ title: 'Concert' });
+    const mockCreateResponse = {
+      data: {
+        id: 'event_123',
+        name: 'Test Event',
+        status: 'created'
+      }
+    };
 
-      expect(event).toEqual({ id: 1 });
+    beforeEach(() => {
+      axios.post
+        .mockResolvedValueOnce(mockAuthResponse)
+        .mockResolvedValueOnce(mockCreateResponse);
+    });
+
+    it('should successfully create an event', async () => {
+      const result = await EventService.createEvent({
+        name: 'Test Event',
+        capacity: 100,
+        date: '2025-01-01'
+      });
+
+      expect(result).toEqual({
+        eventId: 'event_123',
+        status: 'created',
+        name: 'Test Event'
+      });
+
+      expect(axios.post).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle API errors', async () => {
+      axios.post.mockRejectedValueOnce(new Error('API Error'));
+
+      await expect(EventService.createEvent({
+        name: 'Test Event',
+        capacity: 100,
+        date: '2025-01-01'
+      }))
+        .rejects
+        .toThrow('Event creation failed');
     });
   });
 
-  describe('getEventById', () => {
-    it('should get event by ID', async () => {
-      Event.findByPk.mockResolvedValue({ id: 1 });
+  describe('verifyWebhook', () => {
+    const mockData = {
+      obj: {
+        event_id: 'event_123',
+        name: 'Sample Event',
+        created_at: '2024-01-01',
+        status: 'active',
+        venue: 'Venue A'
+      },
+      hmac: 'event_hmac_valid'
+    };
 
-      const event = await EventService.getEventById(1);
+    it('should verify valid webhook data', () => {
+      crypto.createHmac.mockReturnValue({
+        update: jest.fn().mockReturnThis(),
+        digest: jest.fn().mockReturnValue('event_hmac_valid')
+      });
 
-      expect(event).toEqual({ id: 1 });
-    });
-  });
-
-  describe('updateEvent', () => {
-    it('should update event successfully', async () => {
-      const mockSave = jest.fn().mockResolvedValue(true);
-      Event.findByPk.mockResolvedValue({ id: 1, save: mockSave });
-
-      const updated = await EventService.updateEvent(1, { title: 'Updated' });
-
-      expect(updated.id).toBe(1);
-      expect(mockSave).toHaveBeenCalled();
-    });
-  });
-
-  describe('deleteEvent', () => {
-    it('should delete an event', async () => {
-      Event.destroy.mockResolvedValue(1);
-
-      const result = await EventService.deleteEvent(1);
-
+      const result = EventService.verifyWebhook(mockData, 'webhook_secret');
       expect(result).toBe(true);
     });
-  });
 
-  describe('createReservation', () => {
-    it('should create a reservation', async () => {
-      Reservation.create.mockResolvedValue({ id: 'resv1' });
+    it('should reject invalid webhook data', () => {
+      crypto.createHmac.mockReturnValue({
+        update: jest.fn().mockReturnThis(),
+        digest: jest.fn().mockReturnValue('invalid_hmac')
+      });
 
-      const resv = await EventService.createReservation(1, 1);
-
-      expect(resv.id).toBe('resv1');
+      const result = EventService.verifyWebhook(mockData, 'webhook_secret');
+      expect(result).toBe(false);
     });
-  });
 
-  describe('cancelReservation', () => {
-    it('should cancel a reservation', async () => {
-      const mockSave = jest.fn().mockResolvedValue(true);
-      Reservation.findByPk.mockResolvedValue({ status: 'active', save: mockSave });
-
-      const result = await EventService.cancelReservation('resv1');
-
-      expect(result).toBe(true);
-    });
-  });
-
-  describe('searchEvents', () => {
-    it('should return search results from Elastic', async () => {
-      const mockClient = {
-        search: jest.fn().mockResolvedValue({
-          hits: { hits: [{ _source: { id: 1, title: 'Test' } }] }
-        })
+    it('should handle missing event_id', () => {
+      const dataWithoutEventId = {
+        ...mockData,
+        obj: { ...mockData.obj, event_id: null }
       };
-      Client.mockImplementation(() => mockClient);
 
-      const result = await EventService.searchEvents('Test');
+      crypto.createHmac.mockReturnValue({
+        update: jest.fn().mockReturnThis(),
+        digest: jest.fn().mockReturnValue('event_hmac_valid')
+      });
 
-      expect(result).toEqual([{ id: 1, title: 'Test' }]);
+      const result = EventService.verifyWebhook(dataWithoutEventId, 'webhook_secret');
+      expect(result).toBe(true);
+    });
+
+    it('should handle errors during verification', () => {
+      crypto.createHmac.mockImplementation(() => {
+        throw new Error('Crypto error');
+      });
+
+      const result = EventService.verifyWebhook(mockData, 'webhook_secret');
+      expect(result).toBe(false);
     });
   });
 });

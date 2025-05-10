@@ -1,24 +1,17 @@
-const {
-  createEvent,
-  getEventById,
-  updateEvent,
-  deleteEvent,
-  createReservation,
-  cancelReservation,
-  searchEvents,
-  checkHealth
-} = require('../../controllers/eventController');
-
+const { createEvent, cancelEvent, checkHealth } = require('../../controllers/eventController');
 const EventService = require('../../services/eventService');
+const { Event } = require('../../models');
 const redisClient = require('../../redisClient');
 const axios = require('axios');
 
+// Mock dependencies
 jest.mock('../../services/eventService');
+jest.mock('../../models');
 jest.mock('../../redisClient');
 jest.mock('axios');
 jest.mock('../../messaging/sendMessage', () => ({
-  notifyReservationCreation: jest.fn(),
-  notifyReservationCancellation: jest.fn()
+  notifyVendors: jest.fn(),
+  updateEventStatus: jest.fn()
 }));
 
 describe('Event Controller', () => {
@@ -32,120 +25,114 @@ describe('Event Controller', () => {
 
     mockJson = jest.fn();
     mockStatus = jest.fn().mockReturnThis();
-    mockRes = { json: mockJson, status: mockStatus };
+    mockRes = {
+      json: mockJson,
+      status: mockStatus
+    };
 
     mockReq = {
       body: {
-        title: 'Test Event',
-        date: '2025-06-01',
-        location: 'Cairo',
-        capacity: 100
+        name: 'Concert Night',
+        capacity: 300,
+        date: '2025-08-01'
       },
-      params: { id: '1' },
-      query: { q: 'Cairo' }
+      params: {
+        id: '1'
+      }
     };
+
+    redisClient.get.mockResolvedValue(JSON.stringify({
+      vendor_id: 10,
+      capacity: 300,
+      date: '2025-08-01'
+    }));
+
+    axios.get.mockResolvedValue({ status: 200 });
   });
 
   describe('createEvent', () => {
-    it('should create an event', async () => {
-      EventService.createEvent.mockResolvedValue({ id: 1 });
+    it('should successfully create an event', async () => {
+      EventService.createEvent.mockResolvedValue({
+        eventId: 'event_123',
+        name: 'Concert Night',
+        status: 'created'
+      });
+
+      Event.create.mockResolvedValue({
+        id: 1,
+        name: 'Concert Night',
+        capacity: 300
+      });
 
       await createEvent(mockReq, mockRes);
 
-      expect(mockJson).toHaveBeenCalledWith({ success: true, event: { id: 1 } });
+      expect(mockJson).toHaveBeenCalledWith({
+        success: true,
+        eventId: 'event_123',
+        name: 'Concert Night'
+      });
     });
 
-    it('should handle creation errors', async () => {
-      EventService.createEvent.mockRejectedValue(new Error('Create failed'));
+    it('should handle missing vendor info in Redis', async () => {
+      redisClient.get.mockResolvedValue(null);
 
       await createEvent(mockReq, mockRes);
 
       expect(mockStatus).toHaveBeenCalledWith(500);
       expect(mockJson).toHaveBeenCalledWith({
         success: false,
-        error: 'Create failed'
+        error: 'Vendor info not found in Redis'
+      });
+    });
+
+    it('should handle invalid event data', async () => {
+      redisClient.get.mockResolvedValue(JSON.stringify({
+        vendor_id: null,
+        capacity: 0
+      }));
+
+      await createEvent(mockReq, mockRes);
+
+      expect(mockStatus).toHaveBeenCalledWith(400);
+      expect(mockJson).toHaveBeenCalledWith({
+        success: false,
+        error: expect.any(String)
       });
     });
   });
 
-  describe('getEventById', () => {
-    it('should return the event', async () => {
-      EventService.getEventById.mockResolvedValue({ id: 1 });
+  describe('cancelEvent', () => {
+    it('should successfully cancel an event', async () => {
+      Event.findByPk.mockResolvedValue({
+        id: 1,
+        status: 'active',
+        save: jest.fn().mockResolvedValue(true)
+      });
 
-      await getEventById(mockReq, mockRes);
+      await cancelEvent(mockReq, mockRes);
 
-      expect(mockJson).toHaveBeenCalledWith({ success: true, event: { id: 1 } });
+      expect(mockJson).toHaveBeenCalledWith({
+        success: true,
+        message: 'Event ID 1 cancelled successfully'
+      });
     });
 
-    it('should handle event not found', async () => {
-      EventService.getEventById.mockResolvedValue(null);
+    it('should handle non-existent event', async () => {
+      Event.findByPk.mockResolvedValue(null);
 
-      await getEventById(mockReq, mockRes);
+      await cancelEvent(mockReq, mockRes);
 
       expect(mockStatus).toHaveBeenCalledWith(404);
       expect(mockJson).toHaveBeenCalledWith({
         success: false,
-        error: 'Event not found'
+        message: 'Event not found'
       });
-    });
-  });
-
-  describe('updateEvent', () => {
-    it('should update the event', async () => {
-      EventService.updateEvent.mockResolvedValue({ id: 1, title: 'Updated' });
-
-      await updateEvent(mockReq, mockRes);
-
-      expect(mockJson).toHaveBeenCalledWith({ success: true, event: { id: 1, title: 'Updated' } });
-    });
-  });
-
-  describe('deleteEvent', () => {
-    it('should delete the event', async () => {
-      EventService.deleteEvent.mockResolvedValue(true);
-
-      await deleteEvent(mockReq, mockRes);
-
-      expect(mockJson).toHaveBeenCalledWith({ success: true });
-    });
-  });
-
-  describe('createReservation', () => {
-    it('should create a reservation', async () => {
-      EventService.createReservation.mockResolvedValue({ reservationId: 'abc' });
-
-      await createReservation(mockReq, mockRes);
-
-      expect(mockJson).toHaveBeenCalledWith({ success: true, reservationId: 'abc' });
-    });
-  });
-
-  describe('cancelReservation', () => {
-    it('should cancel a reservation', async () => {
-      EventService.cancelReservation.mockResolvedValue(true);
-
-      await cancelReservation(mockReq, mockRes);
-
-      expect(mockJson).toHaveBeenCalledWith({ success: true });
-    });
-  });
-
-  describe('searchEvents', () => {
-    it('should return search results', async () => {
-      EventService.searchEvents.mockResolvedValue([{ id: 1 }]);
-
-      await searchEvents(mockReq, mockRes);
-
-      expect(mockJson).toHaveBeenCalledWith({ success: true, events: [{ id: 1 }] });
     });
   });
 
   describe('checkHealth', () => {
     it('should return ok status', async () => {
-      axios.get.mockResolvedValue({ status: 200 });
-
       await checkHealth(mockReq, mockRes);
-
       expect(mockStatus).toHaveBeenCalledWith(200);
       expect(mockJson).toHaveBeenCalledWith({ status: 'ok' });
     });
