@@ -1,79 +1,23 @@
 const amqp = require('amqplib');
-const logger = require('../utils/logger');
-const { handleTicketCreation, handlePaymentConfirmation } = require('../services/notificationService');
+const redisClient = require("../redisClient");
+const ticket = require('../../ticket-service/ticket/models/ticket');
 
-async function setupMessageConsumers() {
-  try {
-    const connection = await amqp.connect(process.env.RABBITMQ_URL || 'amqp://localhost');
-    const channel = await connection.createChannel();
-    
-    // Listen to ticket creation
-    const ticketExchange = 'confirmTicket';
-    const ticketQueue = 'notificationTicketQueue';
-    const ticketRoutingKey = 'tickets->payment';
-
-    await channel.assertExchange(ticketExchange, 'direct', { durable: true });
-    await channel.assertQueue(ticketQueue, { durable: true });
-    await channel.bindQueue(ticketQueue, ticketExchange, ticketRoutingKey);
-
-    // Listen to payment confirmation
-    const paymentExchange = 'eventReservation';
-    const paymentQueue = 'notificationPaymentQueue';
-    const paymentRoutingKey = 'payment->events';
-
-    await channel.assertExchange(paymentExchange, 'direct', { durable: true });
-    await channel.assertQueue(paymentQueue, { durable: true });
-    await channel.bindQueue(paymentQueue, paymentExchange, paymentRoutingKey);
-
-    logger.info('RabbitMQ connections established');
-
-    // Handle ticket creation messages
-    channel.consume(ticketQueue, async (message) => {
-      if (message !== null) {
-        const data = JSON.parse(message.content.toString());
-        logger.info('Received ticket creation:', data);
-        
-        try {
-          await handleTicketCreation(data);
-          channel.ack(message);
-        } catch (error) {
-          logger.error('Error processing ticket creation:', error);
-          channel.nack(message, false, true);
-        }
-      }
-    });
-
-    // Handle payment confirmation messages
-    channel.consume(paymentQueue, async (message) => {
-      if (message !== null) {
-        const data = JSON.parse(message.content.toString());
-        logger.info('Received payment confirmation:', data);
-        
-        try {
-          await handlePaymentConfirmation(data);
-          channel.ack(message);
-        } catch (error) {
-          logger.error('Error processing payment confirmation:', error);
-          channel.nack(message, false, true);
-        }
-      }
-    });
-
-    // Handle connection errors
-    connection.on('error', (error) => {
-      logger.error('RabbitMQ connection error:', error);
-      setTimeout(setupMessageConsumers, 5000);
-    });
-
-    connection.on('close', () => {
-      logger.error('RabbitMQ connection closed');
-      setTimeout(setupMessageConsumers, 5000);
-    });
-
-  } catch (error) {
-    logger.error('RabbitMQ setup error:', error);
-    setTimeout(setupMessageConsumers, 5000);
-  }
+async function recieveEventInfo() {
+  const exchange = "eventInfo"
+  const bindingKey = "events->notifs"
+  const con = await amqp.connect("amqp://localhost")
+  const channel = await con.createChannel()
+  await channel.assertExchange(exchange, "direct", {durable:true})
+  const q = await channel.assertQueue("eventMessages",{durable:true})
+  await channel.bindQueue(q.queue, exchange, bindingKey)
+  console.log("receiving message from events")
+  channel.consume(q.queue, async(message)=>{
+      const data = JSON.parse(message.content.toString())
+      console.log(data)
+      await redisClient.set(`event:${data.id}`,JSON.stringify({ticket_id: data.ticket_id, description: data.description, date: data.date, address: data.address}))
+      const redisValue = await redisClient.get(`event:${data.id}`);
+      console.log("Saved in Redis:", JSON.parse(redisValue));
+      channel.ack(message)
+  })
 }
-
-module.exports = setupMessageConsumers; 
+module.exports = {recieveEventInfo}

@@ -264,19 +264,19 @@ services:
   notification-service:
     build:
       context: ./notification-service
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - "8088:8083"
     environment:
-      RABBITMQ_URL: amqp://rabbitmq
+      RABBITMQ_URL: amqp://amqp
       REDIS_URL: redis://redis:6379
-      SMTP_HOST: smtp.gmail.com
-      SMTP_PORT: 587
-      SMTP_USER: ${SMTP_USER}
-      SMTP_PASS: ${SMTP_PASS}
+      PORT: 8083
+      RESEND_API_KEY: re_Rs56gqd8_21Muc3jUKGkH2jP42k6Hy7gf
+      RESEND_FROM_EMAIL: onboarding@resend.dev
+      LOG_LEVEL: info
     depends_on:
       - rabbitmq
-      - redis
+      - redis 
 
 volumes:
   users_pgdata:

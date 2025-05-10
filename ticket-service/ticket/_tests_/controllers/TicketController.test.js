@@ -1,6 +1,5 @@
 const { createTicket, getTicketById, checkHealth } = require('../../controllers/ticketController');
 const TicketService = require('../../services/ticketService');
-const { ticket } = require('../../models');
 const redisClient = require('../../redisClient');
 const axios = require('axios');
 // Mock dependencies
