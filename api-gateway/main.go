@@ -7,8 +7,10 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/mux"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/time/rate"
@@ -17,8 +19,7 @@ import (
 var (
 	rdb          *redis.Client
 	limiter      = rate.NewLimiter(rate.Every(time.Minute/100), 30) // 100 RPM
-	jwtSecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))              // Same secret as auth-service
-
+	jwtSecretKey = []byte("supersecretkey")
 )
 
 func init() {
@@ -57,14 +58,104 @@ func rateLimit(next http.Handler) http.Handler {
 	})
 }
 
+func authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Skip auth for health check and auth endpoints
+		if r.URL.Path == "/health" || strings.HasPrefix(r.URL.Path, "/auth") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(w, "Authorization header missing", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		if tokenString == authHeader {
+			http.Error(w, "Bearer token missing", http.StatusUnauthorized)
+			return
+		}
+
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, jwt.ErrSignatureInvalid
+			}
+			return jwtSecretKey, nil
+		})
+
+		if err != nil || !token.Valid {
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
+			return
+		}
+
+		// Add user info to context
+		ctx := context.WithValue(r.Context(), "user", claims)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func roleBasedRouting(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Skip routing logic for health check and auth endpoints
+		if r.URL.Path == "/health" || strings.HasPrefix(r.URL.Path, "/auth") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		user := r.Context().Value("user").(jwt.MapClaims)
+		role, ok := user["role"].(string)
+		if !ok {
+			http.Error(w, "Invalid role in token", http.StatusForbidden)
+			return
+		}
+
+		// Route based on role
+		switch role {
+		case "organizer", "admin":
+			// Organizers/admins can ONLY access these specific prefixes
+			if strings.HasPrefix(r.URL.Path, "/v1/organizers") ||
+				strings.HasPrefix(r.URL.Path, "/v1/vendor") {
+				next.ServeHTTP(w, r)
+			} else {
+				http.Error(w, "Access denied: organizer/admin role restricted to specific endpoints", http.StatusForbidden)
+			}
+		case "user":
+			// Users can access ANYTHING except organizer/admin endpoints
+			if strings.HasPrefix(r.URL.Path, "/v1/organizers") ||
+				strings.HasPrefix(r.URL.Path, "/v1/vendor") {
+				http.Error(w, "Access denied: users cannot access organizer/admin endpoints", http.StatusForbidden)
+			} else {
+				next.ServeHTTP(w, r)
+			}
+		default:
+			http.Error(w, "Unknown role", http.StatusForbidden)
+		}
+	})
+}
 func reverseProxy(target string) http.Handler {
 	url, _ := url.Parse(target)
-	return httputil.NewSingleHostReverseProxy(url)
+	proxy := httputil.NewSingleHostReverseProxy(url)
+
+	// Modify request to add original headers
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.Header.Set("X-Forwarded-For", r.RemoteAddr)
+		proxy.ServeHTTP(w, r)
+	})
 }
 
 func main() {
 	r := mux.NewRouter()
 	r.Use(rateLimit)
+	r.Use(authMiddleware)
+	r.Use(roleBasedRouting)
 
 	r.PathPrefix("/v1/users").Handler(reverseProxy("http://user-service:8080"))
 	r.PathPrefix("/v1/vendor").Handler(reverseProxy("http://vendor-service:8080"))

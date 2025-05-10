@@ -1,11 +1,19 @@
 services:
   api-gateway-1:
     build: ./api-gateway
+    container_name: api-gateway-1
+    ports:
+      - "8089:8080"
+    expose:
+      - "8080"
+
     environment:
       REDIS_HOST: redis
   api-gateway-2:
     build: ./api-gateway
+    container_name: api-gateway-2
     environment:
+       
       REDIS_HOST: redis     
 
   load-balancer:
@@ -15,23 +23,7 @@ services:
       - "8404:8404"  
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
-    depends_on:
-      - api-gateway-1
-      - api-gateway-2
-      - payment-service
-      - user-service
-      - vendor-service
-      - organizers-service
-      - events-service
-      - payment-db
-      - user-db
-      - vendor-db
-      - organizer-db
-      - events-db
-      - redis
-      - ticket-service
-      - notification-service
-
+    
   redis:
     image: redis:7
     ports:
@@ -201,7 +193,6 @@ services:
       - "8086:8000"
     env_file: ./Auth/.env
     environment:
-      - REDIRECT_URI=http://localhost/auth/google/callback
       - NODE_ENV=development
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
