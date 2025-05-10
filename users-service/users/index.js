@@ -2,7 +2,8 @@ const config = require('./config');
 const logger = require('./logger');
 const ExpressServer = require('./expressServer');
 const {sequelize} = require('./models');
-const app = require("./app")
+const app = require("./app");
+const recieveMessageFromAuth = require('./messaging/recieveMessage');
 
 const launchServer = async () => {
   try {
@@ -20,5 +21,5 @@ sequelize.sync({alter:true}).then(() => {
 }).catch((error) => {
   console.error(error);
 })
-
+recieveMessageFromAuth()
 launchServer().catch(e => logger.error(e));

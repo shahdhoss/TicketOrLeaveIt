@@ -67,7 +67,7 @@ router.get('/google/callback', async (req, res) => {
     const refresh_token = createRefreshToken(payload);
 
     // Send message to user service about login
-    await publishMessage('user_service_queue', {
+    await publishMessage({
       type: isNewUser ? 'USER_CREATED' : 'USER_LOGGED_IN',
       data: {
         user_id: user.id,
@@ -140,7 +140,7 @@ router.post('/adminme', verifyAccessToken, async (req, res) => {
     const refresh_token = createRefreshToken(payload);
 
     // Send message to user service
-    await publishMessage('user_service_queue', {
+    await publishMessage({
       type: 'ROLE_UPDATED',
       data: {
         user_id: user.id,

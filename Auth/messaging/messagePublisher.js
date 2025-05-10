@@ -18,8 +18,10 @@ const publishMessage = async (queue, message) => {
     if (!channel) {
       await connect();
     }
-    await channel.assertQueue(queue);
-    channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)));
+    const exchange = "sendUserInfo"
+    const routingKey = "auth->users"
+    await channel.assertExchange(exchange, "direct", {durable:true})
+    channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(message)))
   } catch (error) {
     console.error('Error publishing message:', error);
     throw error;

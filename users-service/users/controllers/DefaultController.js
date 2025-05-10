@@ -20,24 +20,9 @@ const usersIdPATCH = async (request, response) => {
   await Controller.handleRequest(request, response, service.usersIdPATCH);
 };
 
-const usersPOST = async (request, response) => {
-  await Controller.handleRequest(request, response, service.usersPOST);
-};
-
-const usersProfilePicturePATCH = async (request, response) => {
-  await Controller.handleRequest(request, response, service.usersProfilePicturePATCH);
-};
-
-const usersProfilePicturePOST = async (request, response) => {
-  await Controller.handleRequest(request, response, service.usersProfilePicturePOST);
-};
-
 
 module.exports = {
   usersIdDELETE,
   usersIdGET,
   usersIdPATCH,
-  usersPOST,
-  usersProfilePicturePATCH,
-  usersProfilePicturePOST,
 };

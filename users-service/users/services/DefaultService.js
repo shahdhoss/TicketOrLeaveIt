@@ -84,33 +84,9 @@ const usersIdPATCH = ( id ) => new Promise(
     }
   },
 );
-/**
-* Add a new user
-*
-* user User 
-* no response value expected for this operation
-* */
-const usersPOST = ( user ) => new Promise(
-  async (resolve, reject) => {
-    try {
-      const {first_name, last_name, email,password} = user.body
-      const userData = {first_name, last_name, email,password}
-      const userCreated = await users.create(userData)
-      resolve(Service.successResponse({
-        user:userCreated,
-      }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
 
 
 module.exports = {
-  usersPOST,
   usersIdDELETE:(id)=>
     withBreaker(usersIdDELETE)(id).catch((e)=> Promise.reject(
       Service.rejectResponse(e.message || "Invalid input", e.status|| 405)
@@ -122,10 +98,6 @@ module.exports = {
     )),
   usersIdPATCH:(id)=>
     withBreaker(usersIdPATCH)(id).catch((e)=> Promise.reject(
-      Service.rejectResponse(e.message || "invalid input", e.status ||405)
-    )),
-  usersPOST:(user)=>
-    withBreaker(usersPOST)(user).catch((e)=> Promise.reject(
       Service.rejectResponse(e.message || "invalid input", e.status ||405)
     )),
 };
