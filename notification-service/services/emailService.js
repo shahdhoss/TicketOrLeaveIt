@@ -1,46 +1,37 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const logger = require('../utils/logger');
 
-let transporter;
-
-function setupEmailService() {
-  transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  });
-
-  logger.info('Email service initialized');
+if (!process.env.RESEND_API_KEY) {
+  logger.error('RESEND_API_KEY is not configured in environment variables');
+  process.exit(1);
 }
 
-async function sendEmail({ to, subject, text, html }) {
-  try {
-    if (!transporter) {
-      throw new Error('Email service not initialized');
-    }
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-    const mailOptions = {
-      from: process.env.SMTP_FROM,
+const sendEmail = async ({ to, subject, text, html }) => {
+  try {
+    logger.info('Sending email:', { to, subject });
+
+    const data = {
+      from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
       to,
       subject,
       text,
       html
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    logger.info('Email sent successfully', { messageId: info.messageId });
-    return info;
+    const response = await resend.emails.send(data);
+    logger.info('Email sent successfully:', { id: response.id });
+    return response;
   } catch (error) {
-    logger.error('Error sending email:', error);
+    logger.error('Error sending email:', {
+      message: error.message,
+      statusCode: error.statusCode
+    });
     throw error;
   }
-}
+};
 
 module.exports = {
-  setupEmailService,
   sendEmail
 }; 
