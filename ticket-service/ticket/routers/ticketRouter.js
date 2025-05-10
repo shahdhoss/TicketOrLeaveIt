@@ -1,4 +1,3 @@
-const { response } = require('../../../payment-service/app');
 const {
    ticketsPOST,
    ticketsIdGET,

@@ -178,6 +178,8 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: events
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+
     depends_on:
       - events-db
       - vendor-service
@@ -260,6 +262,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+      
 
   notification-service:
     build:

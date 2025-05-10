@@ -1,5 +1,3 @@
-const ticket = require("../../../ticket-service/ticket/models/ticket")
-
 module.exports= (sequelize, DataTypes) =>{
     const reservations = sequelize.define("reservations", {
         id:{

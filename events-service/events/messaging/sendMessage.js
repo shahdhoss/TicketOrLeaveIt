@@ -3,7 +3,7 @@ const amqp = require("amqplib")
 async function sendReservationToTickets(message){
     const exchange = "reserveTicket"
     const routingKey = "events->tickets"
-    const con = await amqp.connect("amqp://localhost")
+    const con = await amqp.connect(process.env.RABBITMQ_URL||"amqp://localhost")
     const channel = await con.createChannel()
     await channel.assertExchange(exchange, "direct" ,{durable:true})
     channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(message)))
@@ -13,7 +13,7 @@ async function sendReservationToTickets(message){
 async function sendCancellationToPayment(message) {
     const exchange = "cancelReseravtion"
     const routingKey = "events->payment"
-    const con = await amqp.connect("amqp://localhost")
+    const con = await amqp.connect(process.env.RABBITMQ_URL||"amqp://localhost")
     const channel = await con.createChannel()
     await channel.assertExchange(exchange, "direct" ,{durable:true})
     channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(message)))
@@ -23,7 +23,7 @@ async function sendCancellationToPayment(message) {
 async function sendEventInfoToNotifications(message) {
     const exchange = "eventInfo"
     const routingKey = "events->notifs"
-    const con = await amqp.connect("amqp://localhost")
+    const con = await amqp.connect(process.env.RABBITMQ_URL||"amqp://localhost")
     const channel = await con.createChannel()
     await channel.assertExchange(exchange, "direct" ,{durable:true})
     channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(message)))

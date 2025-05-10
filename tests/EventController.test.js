@@ -1,7 +1,7 @@
 const { createEvent, cancelEvent, checkHealth } = require('../../controllers/eventController');
 const EventService = require('../../services/eventService');
-const { Event } = require('../../models');
-const redisClient = require('../../redisClient');
+const { Event } = require('../events-service/events/models');
+const redisClient = require('../events-service/events/redisClient');
 const axios = require('axios');
 
 // Mock dependencies
