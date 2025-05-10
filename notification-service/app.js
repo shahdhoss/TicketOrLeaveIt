@@ -1,23 +1,31 @@
 require('dotenv').config();
 const express = require('express');
-const { setupEmailService } = require('./services/emailService');
-const setupMessageConsumers = require('./messaging/receiveMessages');
-const notificationRoutes = require('./routes/notificationRoutes');
+const cors = require('cors');
 const logger = require('./utils/logger');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 8083;
 
-// Setup email service
-setupEmailService();
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-// Setup RabbitMQ consumers
-setupMessageConsumers();
-
-// Use notification routes
+// Routes
 app.use('/api/v1/notifications', notificationRoutes);
 
-// Start server
+// Error handling middleware
+app.use((err, req, res, next) => {
+  logger.error('Unhandled error:', err);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: err.message 
+  });
+});
+
+const PORT = process.env.PORT || 8083;
+
 app.listen(PORT, () => {
   logger.info(`Notification service listening on port ${PORT}`);
-}); 
+});
+
+module.exports = app; 
