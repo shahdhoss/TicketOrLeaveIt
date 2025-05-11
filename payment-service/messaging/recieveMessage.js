@@ -4,7 +4,7 @@ const redisClient = require("../redisClient")
 async function recieveReservationRequestFromTickets() {
     const exchange = "confirmTicket"
     const bindingKey = "tickets->payment"
-    const con = await amqp.connect("amqp://localhost")
+    const con = await amqp.connect(process.env.RABBITMQ_URL||"amqp://localhost")
     const channel = await con.createChannel()
     await channel.assertExchange(exchange, "direct", {durable: true})
     const q = await channel.assertQueue("payments", {durable: true})
@@ -23,7 +23,7 @@ async function recieveReservationRequestFromTickets() {
 async function recieveCancellationRequestFromEvents() {
     const exchange = "cancelReseravtion"
     const bindingKey = "events->payment"
-    const con = await amqp.connect("amqp://localhost")
+    const con = await amqp.connect(process.env.RABBITMQ_URL ||"amqp://localhost")
     const channel = await con.createChannel()
     await channel.assertExchange(exchange, "direct", {durable: true})
     const q = await channel.assertQueue("cancellations", {durable: true})

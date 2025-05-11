@@ -49,6 +49,7 @@ services:
       PAYMOB_API_KEY: "ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2TVRBek9ERTFOQ3dpYm1GdFpTSTZJakUzTkRRNE16VTVOVGd1TmpFeU5EQTJJbjAuSkl3X2xsRmlRRmFMVWd5UTd1cXlhSHRFVndaVkV3dTBjTmNISW91LUZYQkRMRkRPTGpidTdiQVE5dGxMajE2V21MVHRKcTR5YmNReDF3ZEJMRVI4a3c="
       PAYMOB_INTEGRATION_ID: "5056686"
       PAYMOB_IFRAME_ID: "914522"
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
     depends_on:
       - payment-db
 
@@ -261,16 +262,16 @@ services:
   notification-service:
     build:
       context: ./notification-service
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     ports:
       - "8088:8083"
     environment:
-      RABBITMQ_URL: amqp://amqp
       REDIS_URL: redis://redis:6379
       PORT: 8083
       RESEND_API_KEY: re_Rs56gqd8_21Muc3jUKGkH2jP42k6Hy7gf
       RESEND_FROM_EMAIL: onboarding@resend.dev
       LOG_LEVEL: info
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
     depends_on:
       - rabbitmq
       - redis 

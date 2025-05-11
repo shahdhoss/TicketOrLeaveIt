@@ -7,13 +7,13 @@ const axios = require("axios");
 const { paymentMetrics } = require('../metrics/index');
 
 exports.initiatePayment = async (req, res) => {
-  // const endTimer = paymentMetrics.processDuration.startTimer();
+  const endTimer = paymentMetrics.processDuration.startTimer();
   console.log(`\n=== NEW PAYMENT REQUEST ===\n${JSON.stringify(req.body, null, 2)}`);
   try {
-    // paymentMetrics.requests.labels('POST', 'started').inc();
-    // paymentMetrics.amounts.observe(req.body.amount);
-    // paymentMetrics.requests.labels('POST', 'started').inc();
-    // paymentMetrics.amounts.observe(req.body.amount);
+    paymentMetrics.requests.labels('POST', 'started').inc();
+    paymentMetrics.amounts.observe(req.body.amount);
+    paymentMetrics.requests.labels('POST', 'started').inc();
+    paymentMetrics.amounts.observe(req.body.amount);
     const ticketsQueue = "updatedTickets"
     const eventsQueue = "eventMessages"
    
@@ -52,8 +52,8 @@ exports.initiatePayment = async (req, res) => {
       const updated_capacity = {user_id: user_id, event_id: event_id, reservation_id:reservation_id, message: "Decrement", payment_id: paymentData.orderId, ticket_id: ticketId }
       updateTicketReservation(updated_ticket_status)
       updateEventCapacityandReservationStatus(updated_capacity)
-      // paymentMetrics.requests.labels('POST', 'success').inc();
-      // endTimer();
+      paymentMetrics.requests.labels('POST', 'success').inc();
+      endTimer();
       return res.json({ 
         success: true,
         paymentUrl: paymentData.paymentUrl,
@@ -65,8 +65,8 @@ exports.initiatePayment = async (req, res) => {
   res.status({success:false})
   
 } catch (error) {
-  // paymentMetrics.requests.labels('POST', 'error').inc();
-  //  endTimer();
+  paymentMetrics.requests.labels('POST', 'error').inc();
+   endTimer();
     console.error('\n❌ CONTROLLER ERROR:', {
       error: error.message,
       stack: error.stack,
@@ -83,7 +83,7 @@ exports.initiatePayment = async (req, res) => {
 };
 
 exports.refundPayment = async (req, res) => {
-  // const endTimer = paymentMetrics.refundDuration.startTimer();
+  const endTimer = paymentMetrics.refundDuration.startTimer();
   const { id } = req.params;
 
   console.log(`\n🔁 Initiating refund for payment ID: ${id}`);
@@ -110,7 +110,7 @@ exports.refundPayment = async (req, res) => {
     updateTicketReservation(updated_ticket_status)
     updateEventCapacityandReservationStatus(updated_capacity)
     
-    // endTimer();
+    endTimer();
     console.log(`✅ Payment ID ${id} marked as refunded.`);
     res.json({
       success: true,
@@ -119,7 +119,7 @@ exports.refundPayment = async (req, res) => {
 
   } catch (error) {
     paymentMetrics.refunds.labels('failed').inc();
-    // endTimer();
+    endTimer();
     console.error(`❌ Refund Error for Payment ID ${id}:`, error.message);
     res.status(500).json({
       success: false,

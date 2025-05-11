@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 8083
 
-CMD ["node", "index.js"] 
+CMD ["node", "app.js"] 

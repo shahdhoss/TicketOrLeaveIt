@@ -4,7 +4,7 @@ const redisClient = require("../redisClient");
 async function recieveEventInfo() {
   const exchange = "eventInfo"
   const bindingKey = "events->notifs"
-  const con = await amqp.connect("amqp://localhost")
+  const con = await amqp.connect(process.env.RABBITMQ_URL ||"amqp://localhost")
   const channel = await con.createChannel()
   await channel.assertExchange(exchange, "direct", {durable:true})
   const q = await channel.assertQueue("eventMessages",{durable:true})
