@@ -7,7 +7,7 @@ const grpcObject = grpc.loadPackageDefinition(packageDef);
 const vendorPackage = grpcObject.vendor;
 
 const vendorClient = new vendorPackage.VendorService(
-  "vendor-service:50051",
+  "localhost:50051",
   grpc.credentials.createInsecure()
 );
 

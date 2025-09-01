@@ -22,7 +22,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 8083;
+const PORT = process.env.PORT || 8084;
 recieveEventInfo()
 app.listen(PORT, () => {
   logger.info(`Notification service listening on port ${PORT}`);

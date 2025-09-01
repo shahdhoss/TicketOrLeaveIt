@@ -6,7 +6,7 @@ const withBreaker = require("../circuit-breaker/breaker")
 const redisclient = require("../redisClient")
 const { Client } = require('@elastic/elasticsearch');
 const es_client = new Client({
-  node: "http://elasticsearch:9200",
+  node: "http://localhost:9200",
   apiVersion: '8.x'
 });
 const {sendReservationToTickets, sendCancellationToPayment} = require("../messaging/sendMessage")
@@ -262,7 +262,7 @@ const eventsCancel = (reservation) => new Promise(
       const cancellations_queue = "cancellations"
       const {user_id, event_id}= reservation.body
       const resObject = {user_id, event_id}
-      const payment_health = axios.get("http://localhost/api/payments/health")
+      const payment_health = axios.get("http://localhost:8083/api/payments/health")
       if(isHealthy(cancellations_queue) && (await payment_health).status ===200){
         const updateReservation = await reservations.update({status: "canceled"}, {where:{id: event_id}})
         if(!updateReservation){

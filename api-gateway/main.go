@@ -73,6 +73,7 @@ func main() {
 	r.PathPrefix("/api/payments").Handler(reverseProxy("http://payment-service:8081"))
 	r.PathPrefix("/auth").Handler(reverseProxy("http://auth-service:8000"))
 	r.PathPrefix("/v1/notifications").Handler(reverseProxy("http://notification-service:8083"))
+	r.PathPrefix("/v1/tickets").Handler(reverseProxy("http://ticket-service:8087"))
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
