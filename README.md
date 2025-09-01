@@ -1,66 +1,13 @@
-# Ticket or Leave It
+# Ticket or Leave it 
+This project is built mainly for learning how to build microservices, how to create gRPC requests for the internal communication between services, in addition to learning about load balancers, circuit breakers, and rate limiters. 
 
-**Ticket or Leave It** is a comprehensive learning project created for practicing and learning how to build a microservices ecosystem featuring internal communication, scalability tools, and resilient infrastructure patterns.
+## The structure of the project:
+Each service can be found in a folder name accordingly in the root of the project. The project contains a docker compose file for building and running the containerized services 
 
----
+## More info about the microservices:
+The users, vendors, organizers, and events microservices have been built using ExpressJS, utilizing sequelize as the database ORM to facilitate database operations. The services have been generated using OpenAPI auto generation, with careful consideration for maintaining api versioning. A screenshot of a test for every api endpoint can be found in the folder named postman screenshots in every microservice
 
-## Table of Contents
-1. [Overview](#overview)  
-2. [Architecture & Structure](#architecture--structure)  
-3. [Technologies](#technologies)  
-4. [Getting Started](#getting-started)  
-5. [Service Descriptions](#service-descriptions)  
+Key components of each service can found in DefaultServices, routers, models, circuit breaker and index.js
 
----
+A gRPC communication has been included between the events service and the vendor service 
 
-## Overview
-A hands-on microservices project focused on:
-- Learning gRPC for internal inter-service communication
-- Implementing load balancing, circuit breaking, and rate limiting
-- Orchestrating services via Docker Compose
-
----
-
-## Architecture & Structure
-The project contains several services, each in its designated folder. Coordination and orchestration are managed via **docker-compose** for seamless containerized deployments.
-
----
-
-## Technologies
-- **Express.js**: Used for building HTTP microservices  
-- **Sequelize ORM**: Facilitates database operations  
-- **OpenAPI Generator**: Auto-generates API contracts, with versioning support  
-- **gRPC**: Enables inter-service communication (notably between Events and Vendor services)  
-- Infrastructure patterns like load balancing, circuit breakers, and rate limiting are included  
-
----
-
-## Getting Started
-
-### 1. Clone the repo
-```bash
-git clone https://github.com/shahdhoss/TicketOrLeaveIt.git
-cd TicketOrLeaveIt
-```
-
-### 2. Run with Docker Compose
-```bash
-docker-compose up --build
-```
-
-## Service descriptions
-- **Users Service:** Manages user profiles and authentication workflows
-
-- **Vendors Service:** Handles vendor entities and related operations
-
-- **Organizers Service:** Oversees event organizer data
-
-- **Events Service:** Manages event details and coordinates with the Vendors service via gRPC
-
-- **Ticket Service:** Facilitates ticket purchasing and management
-
-- **Payment Service:** Processes payments and financial transactions
-
-- **Notification Service:** Sends confirmations, updates, or alerts
-
-- **API Gateway:** Acts as the central entry point routing client requests
