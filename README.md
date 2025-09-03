@@ -15,7 +15,7 @@
 
 ## Overview
 A hands-on microservices project focused on:
-- Learning gRPC for internal inter-service communication
+- Learning gRPC and messaging for internal inter-service communication
 - Implementing load balancing, circuit breaking, and rate limiting
 - Orchestrating services via Docker Compose
 
@@ -30,7 +30,8 @@ The project contains several services, each in its designated folder. Coordinati
 - **Express.js**: Used for building HTTP microservices  
 - **Sequelize ORM**: Facilitates database operations  
 - **OpenAPI Generator**: Auto-generates API contracts, with versioning support  
-- **gRPC**: Enables inter-service communication (notably between Events and Vendor services)  
+- **gRPC**: Enables synchronous inter-service communication (notably between Events and Vendor services)  
+- **Messaging using rabbitmq** : enables the asynchronous communtication between the services 
 - Infrastructure patterns like load balancing, circuit breakers, and rate limiting are included  
 
 ---
